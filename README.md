@@ -1,1 +1,1 @@
-# Plataforma-de-ferias-y-emprendimientos-estudiantiles--IHC
+# Plataforma-de-ferias-y-emprendimientos-estudiantiles-IHC
