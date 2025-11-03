@@ -1,8 +1,8 @@
-# Plataforma de Ferias y Emprendimientos Estudiantiles (IHC)
+# 🛍️ Plataforma de Ferias y Emprendimientos Estudiantiles (IHC)
 
 Este repositorio contiene una aplicación Next.js (app router) para una plataforma de ferias artesanales y emprendimientos estudiantiles. Está preparada como demo/local — la persistencia de usuarios y sesiones se realiza en `localStorage` para facilitar pruebas en desarrollo.
 
-## Contenido principal
+##  🧩  Contenido principal
 
 - `app/` — páginas de la aplicación (Next.js App Router).
 - `components/` — componentes React reutilizables (UI, auth, comprador, vendedor, admin, shared, etc.).
@@ -11,14 +11,31 @@ Este repositorio contiene una aplicación Next.js (app router) para una platafor
 - `public/` — assets públicos.
 - `styles/` — estilos globales.
 
-## Requisitos
 
-- Node.js (>= 18 recommended)
-- npm (o pnpm/yarn si prefieres). Este proyecto fue probado con `npm`.
+## 🧰 Instalación y dependencias
 
-## Instalación (desarrollo)
+Requisitos mínimos:
+- Node.js >= 18
+- npm (o pnpm/yarn)
 
-Se recomienda usar la instalación de dependencias con la opción `--legacy-peer-deps` por la incompatibilidad de peer dependencies entre `vaul@0.9.9` y React 19 (el proyecto usa React 19 actualmente). Hay una nota más abajo con alternativas y recomendaciones a largo plazo.
+Instalación (recomendado en PowerShell para Windows):
+
+```powershell
+npm install --legacy-peer-deps
+npm run dev
+```
+
+Notas:
+- Usamos `--legacy-peer-deps` debido a un conflicto de peer-dependencies entre `vaul@0.9.9` y `react@19` observado en el repositorio. Esto permite instalar en entornos de desarrollo sin bloquear la instalación.
+- Opciones alternativas:
+  - Degradar `react`/`react-dom` a la serie 18.x y ajustar `@types/react`.
+  - Reemplazar `vaul` por otro drawer compatible.
+
+Scripts útiles:
+- `npm run dev` — arranca Next.js en modo desarrollo
+- `npm run build` — genera build de producción
+- `npm start` — arranca servidor de producción
+- `npm run lint` — ejecuta linter
 
 Instalar dependencias (PowerShell):
 
@@ -45,35 +62,32 @@ Lint:
 npm run lint
 ```
 
-## Qué incluye la aplicación (resumen funcional)
+---
 
-- Autenticación demo: los usuarios y sesiones se guardan en `localStorage` y hay utilidades en `components/auth/users.ts` para crear/validar usuarios, solicitar reset y gestionar la sesión.
-- Dashboards separados para `vendedor` y `comprador`.
-- Componentes UI reutilizables en `components/ui/` (botones, formularios, drawer, avatar, etc.).
-- Perfil de usuario: páginas de edición de perfil ya implementadas en:
-	- `app/vendedor/perfil/page.tsx`
-	- `app/comprador/perfil/page.tsx`
 
-	Estas páginas usan el componente reutilizable `components/shared/profile-form.tsx` que valida con `zod` + `react-hook-form`, actualiza el usuario en `localStorage` y actualiza la sesión visible en el header.
+## 🚀 Tecnologías principales
 
-## Cómo probar la edición de perfil
+- Next.js (App Router) — `next@16.0.0`
+- React — `react@19.2.0`, `react-dom@19.2.0`
+- TypeScript — `typescript@^5`
+- Tailwind CSS — `tailwindcss@^4.1.9`
+- Radix UI — `@radix-ui/react-*` (componentes accesibles)
+- Vaul — `vaul@^0.9.9` (drawer; ver nota de compatibilidad)
+- react-hook-form + @hookform/resolvers — formularios
+- zod — validación de esquemas
+- sonner / sistema de toasts — notificaciones
+- lucide-react — iconos
 
-1. Ejecuta la app en desarrollo (`npm run dev`).
-2. Inicia sesión con un usuario existente (o crea uno con el registro). Hay un admin por defecto creado por `ensureAdminExists()` (email: `admin@gmail.com`, password: `admin`).
-3. Accede a `/vendedor/perfil` o `/comprador/perfil` según tu rol.
-4. Edita `Nombre`, `Email`, `Teléfono` o cambia la contraseña (opcional). Haz clic en `Guardar`.
-5. Verifica que:
-	 - Aparece un toast de éxito.
-	 - El header muestra el nombre actualizado.
-	 - Tras recargar la página, los cambios persisten.
+> Consulta `package.json` para la lista completa y versiones exactas.
 
-Nota: por ahora la persistencia se hace en `localStorage` — es suficiente para demo y pruebas locales. Para producción, implementa rutas API y almacenamiento en servidor.
 
-## Cambios recientes y decisiones importantes
 
-- Se añadió un formulario `ProfileForm` reutilizable en `components/shared/profile-form.tsx`.
-- Se añadieron las rutas `/vendedor/perfil` y `/comprador/perfil`.
-- Se añadió un enlace/avatar en el header (`components/shared/app-header.tsx`) que enlaza al perfil según el rol y es responsive.
+
+
+
+
+
+
 
 ## Nota sobre peer-dependencies (vaul + React)
 
@@ -91,41 +105,6 @@ Opciones para resolverlo:
 
 Recomendación: Para desarrollo rápido puedes mantener `--legacy-peer-deps`, pero antes de pasar a producción o CI, escoge una de las opciones 2 o 3 y valida la compatibilidad.
 
-## Cómo contribuir
-
-- Clona el repositorio, crea una rama por feature/fix y abre un PR.
-- Mantén la coherencia de estilos y ejecuta `npm run lint` antes de abrir el PR.
-
-## Testing recomendado (próximos pasos)
-
-- Añadir tests e2e con Playwright o Cypress para cubrir:
-	- Edición de perfil (tiempo medio y tasa de éxito).
-	- Flujos de login/registro/reset.
-- Añadir tests unitarios para validaciones y utilidades en `components/auth/users.ts`.
-
-## Contacto y notas finales
-
-Si necesitas que implemente persistencia en servidor (API routes + DB), pruebas e2e automatizadas o que resuelva el conflicto de `vaul`/React, dime qué opción prefieres y lo implemento.
-
----
-Archivo: `README.md` (actualizado)
-
-## Tecnologías
-
-Lista de las principales tecnologías y librerías usadas en el proyecto:
-
-- Next.js (App Router) — `next@16.0.0`
-- React — `react@19.2.0`, `react-dom@19.2.0`
-- TypeScript — `typescript@^5`
-- Tailwind CSS — `tailwindcss@^4.1.9`
-- Radix UI — varios paquetes `@radix-ui/react-*` para componentes accesibles
-- Vaul — `vaul@^0.9.9` (drawer component; ver nota sobre peer-deps)
-- react-hook-form + @hookform/resolvers — formularios y validación
-- zod — `zod@3.x` para validación de esquemas
-- sonner / custom toasts — sistema de notificaciones
-- lucide-react — iconos
-
-Nota: la lista completa de dependencias está en `package.json`.
 
 ## Qué hace cada perfil (features por role)
 
@@ -169,45 +148,96 @@ Nota: la lista completa de dependencias está en `package.json`.
 
 Descripción textual del modelo de datos que la aplicación usa o debería usar cuando se implemente backend/DB.
 
-Entidades principales:
+1. USUARIO
+   - id_usuario (PK)
+   - nombre
+   - email (único)
+   - contraseña (almacenar hashed en backend real)
+   - telefono
+   - direccion
+   - Descripción: representa la cuenta de una persona en el sistema; puede tener un perfil específico (cliente, repartidor o vendedor).
 
-- User
-	- id (UUID o autoincrement)
-	- name
-	- email (único)
-	- password (hashed en backend)
-	- phone
-	- role (enum: vendedor, comprador, admin)
+2. CLIENTE
+   - id_cliente (PK)
+   - id_usuario (FK -> USUARIO)
+   - fecha_registro
+   - Descripción: perfil que representa a compradores que realizan pedidos.
 
-- Product
-	- id
-	- title
-	- description
-	- price
-	- images (array/relación a table de imágenes)
-	- vendor_id (FK -> User.id)
-	- created_at, updated_at
+3. REPARTIDOR
+   - id_repartidor (PK)
+   - id_usuario (FK -> USUARIO)
+   - vehiculo
+   - licencia_conducir
+   - Descripción: perfil responsable de la entrega de pedidos.
 
-- Order (sugerido / futuro)
-	- id
-	- buyer_id (FK -> User.id)
-	- total
-	- status
-	- created_at
+4. VENDEDOR
+   - id_vendedor (PK)
+   - id_usuario (FK -> USUARIO)
+   - nombre_tienda
+   - cuenta_bancaria
+   - Descripción: perfil que publica productos y recibe ventas.
 
-- OrderItem (sugerido / futuro)
-	- id
-	- order_id (FK -> Order.id)
-	- product_id (FK -> Product.id)
-	- quantity
-	- price_at_purchase
+5. PRODUCTO
+   - id_producto (PK)
+   - nombre
+   - descripcion
+   - precio
+   - stock
+   - id_vendedor (FK -> VENDEDOR)
+   - Descripción: items que los vendedores publican para la venta.
 
-Relaciones clave:
+6. PEDIDO
+   - id_pedido (PK)
+   - fecha
+   - total
+   - direccion_envio
+   - id_cliente (FK -> CLIENTE)
+   - id_repartidor (FK -> REPARTIDOR)
+   - estado (enum)
+   - Descripción: representa una orden realizada por un cliente que contiene uno o más detalles de pedido.
 
-- User (vendedor) 1 — * Product
-- User (comprador) 1 — * Order
-- Order 1 — * OrderItem
-- Product 1 — * OrderItem (a través de OrderItem.product_id)
+7. DETALLE_PEDIDO
+   - id_detalle (PK)
+   - id_pedido (FK -> PEDIDO)
+   - id_producto (FK -> PRODUCTO)
+   - cantidad
+   - precio_unitario
+   - subtotal
+   - Descripción: línea de pedido que relaciona un producto con una cantidad y precio en un pedido.
+
+8. PAGO
+   - id_pago (PK)
+   - id_pedido (FK -> PEDIDO)
+   - monto
+   - fecha
+   - confirmado_por_repartidor (boolean)
+   - pagado_a_vendedor (boolean)
+   - fecha_pago_vendedor
+   - metodo (enum)
+   - metodo_pago_vendedor (enum)
+   - Descripción: información de pago asociada a un pedido.
+
+9. HISTORIAL_VENTA
+   - id_historial (PK)
+   - id_vendedor (FK -> VENDEDOR)
+   - id_pedido (FK -> PEDIDO)
+   - fecha
+   - total
+   - Descripción: registro de ventas por vendedor (resumen/registro contable).
+
+---
+
+### 🔗 Relaciones clave (redactadas)
+
+- Un `USUARIO` puede tener exactamente un `CLIENTE`, `REPARTIDOR` o `VENDEDOR` (perfiles 1-a-1 según el tipo de cuenta).
+- Un `CLIENTE` puede realizar muchos `PEDIDO` (1 a N).
+- Un `REPARTIDOR` puede entregar muchos `PEDIDO` (1 a N).
+- Un `VENDEDOR` publica muchos `PRODUCTO` (1 a N).
+- Un `PEDIDO` contiene muchos `DETALLE_PEDIDO` (1 a N); cada `DETALLE_PEDIDO` está asociado a un único `PRODUCTO`.
+- Un `PEDIDO` puede tener uno o más `PAGO` asociados (según flujo), y un `PAGO` pertenece a un único `PEDIDO`.
+- Un `VENDEDOR` tiene muchos registros en `HISTORIAL_VENTA` (1 a N), y cada registro apunta a un `PEDIDO`.
+
+---
 
 Diagrama ER (Mermaid)
 
@@ -306,12 +336,8 @@ erDiagram
 
 ```
 
-Nota: el diagrama Mermaid se puede renderizar en plataformas que soporten Mermaid; si no, la representación ASCII anterior contiene la misma información.
 
-## Siguientes pasos sugeridos
 
-- Implementar API routes y una base de datos (SQLite/Postgres) con migraciones.
-- Añadir autenticación segura (JWT o cookies con sesiones server-side) y hashing de contraseñas.
-- Añadir pruebas e2e (Playwright/Cypress) para métricas UX y flujos críticos.
 
-Si quieres, puedo empezar por crear las API routes para usuarios y productos y una pequeña capa de persistencia con SQLite (Prisma) — dime si lo prefieres y lo preparo como siguiente PR.
+
+
