@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
 import { getSession, setSession } from "@/components/auth/users"
 import { useEffect, useState } from "react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 interface AppHeaderProps {
   userName?: string
@@ -16,11 +17,13 @@ interface AppHeaderProps {
 
 export function AppHeader({ userName, userRole, showLogout = true }: AppHeaderProps) {
   const [sessionName, setSessionName] = useState<string | undefined>(userName)
+  const [sessionRole, setSessionRole] = useState<string | undefined>(userRole)
 
   useEffect(() => {
     try {
       const s = getSession()
       if (s) setSessionName(s.name || s.email)
+      if (s) setSessionRole(s.role)
     } catch (e) {
       // ignore
     }
@@ -46,6 +49,26 @@ export function AppHeader({ userName, userRole, showLogout = true }: AppHeaderPr
 
         <div className="flex items-center gap-2">
           {sessionName && <div className="hidden sm:block text-sm mr-2">Hola, <span className="font-medium">{sessionName}</span></div>}
+          {/* Profile link (goes to role-specific profile page) */}
+          {sessionName && sessionRole && (
+            <Link
+              href={sessionRole === 'vendedor' ? '/vendedor/perfil' : sessionRole === 'comprador' ? '/comprador/perfil' : '/admin/dashboard'}
+              aria-label={`Ir al perfil de ${sessionName}`}
+              className="inline-flex items-center gap-2 rounded-md p-2 hover:bg-muted/40 transition-colors"
+            >
+              <Avatar className="h-8 w-8 sm:h-7 sm:w-7">
+                <AvatarFallback>
+                  {sessionName
+                    .split(" ")
+                    .map((n) => (n && n[0] ? n[0] : ''))
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="hidden sm:inline text-sm">Ver/Editar Perfil</span>
+            </Link>
+          )}
           <LanguageToggle />
           <ThemeToggle />
           {showLogout && (

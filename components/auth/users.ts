@@ -139,3 +139,36 @@ export function getSession(): { email: string; role: AppUser['role']; name?: str
     return null
   }
 }
+
+export function getUserByEmail(email: string): AppUser | undefined {
+  try {
+    const users = readUsers()
+    return users.find((u) => u.email.toLowerCase() === email.toLowerCase())
+  } catch (e) {
+    console.error('Failed to get user by email', e)
+    return undefined
+  }
+}
+
+export function updateUserProfile(oldEmail: string, updates: Partial<AppUser>): { ok: boolean; user?: AppUser; error?: string } {
+  try {
+    const users = readUsers()
+    const idx = users.findIndex((u) => u.email.toLowerCase() === oldEmail.toLowerCase())
+    if (idx === -1) return { ok: false, error: 'Usuario no encontrado' }
+
+    // if updating email, ensure uniqueness
+    if (updates.email && updates.email.toLowerCase() !== oldEmail.toLowerCase()) {
+      const exists = users.find((u) => u.email.toLowerCase() === updates.email!.toLowerCase())
+      if (exists) return { ok: false, error: 'Ya existe una cuenta con ese correo' }
+    }
+
+    const user = users[idx]
+    const updated: AppUser = { ...user, ...updates }
+    users[idx] = updated
+    writeUsers(users)
+    return { ok: true, user: updated }
+  } catch (e) {
+    console.error('Failed to update user profile', e)
+    return { ok: false, error: 'Error al actualizar el usuario' }
+  }
+}
