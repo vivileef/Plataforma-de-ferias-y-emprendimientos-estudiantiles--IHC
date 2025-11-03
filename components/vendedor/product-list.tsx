@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Trash2, Eye } from "lucide-react"
+import { Trash2, Eye, Pencil } from "lucide-react"
 import Image from "next/image"
 import { useLanguage } from "@/components/language-provider"
 
@@ -19,10 +19,11 @@ interface Product {
 interface ProductListProps {
   products: Product[]
   onDelete: (id: string) => void
+  onEdit: (product: Product) => void
   onViewDetails: (product: Product) => void
 }
 
-export function ProductList({ products, onDelete, onViewDetails }: ProductListProps) {
+export function ProductList({ products, onDelete, onEdit, onViewDetails }: ProductListProps) {
   if (products.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -73,6 +74,14 @@ export function ProductList({ products, onDelete, onViewDetails }: ProductListPr
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <Eye className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(product)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Pencil className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="ghost"

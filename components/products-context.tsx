@@ -16,6 +16,7 @@ export interface Product {
 type ProductsContextType = {
   products: Product[]
   addProduct: (p: Omit<Product, "id">) => void
+  updateProduct: (id: string, p: Partial<Omit<Product, "id">>) => void
   deleteProduct: (id: string) => void
 }
 
@@ -81,9 +82,13 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
     setProducts((prev) => [...prev, newProduct])
   }
 
+  const updateProduct = (id: string, p: Partial<Omit<Product, "id">>) => {
+    setProducts((prev) => prev.map((product) => (product.id === id ? { ...product, ...p } : product)))
+  }
+
   const deleteProduct = (id: string) => setProducts((prev) => prev.filter((x) => x.id !== id))
 
-  return <ProductsContext.Provider value={{ products, addProduct, deleteProduct }}>{children}</ProductsContext.Provider>
+  return <ProductsContext.Provider value={{ products, addProduct, updateProduct, deleteProduct }}>{children}</ProductsContext.Provider>
 }
 
 export function useProducts() {
