@@ -226,38 +226,97 @@ Diagrama ER (Mermaid)
 
 ```mermaid
 erDiagram
-		USER {
-				string id PK
-				string name
-				string email
-				string password
-				string role
-		}
-		PRODUCT {
-				string id PK
-				string title
-				string description
-				float price
-				string vendor_id FK
-		}
-		ORDER {
-				string id PK
-				string buyer_id FK
-				float total
-				string status
-		}
-		ORDER_ITEM {
-				string id PK
-				string order_id FK
-				string product_id FK
-				int quantity
-				float price_at_purchase
-		}
+    USUARIO {
+        int id_usuario PK
+        string nombre
+        string email
+        string contraseña
+        string telefono
+        string direccion
+    }
 
-		USER ||--o{ PRODUCT : "vende"
-		USER ||--o{ ORDER : "compra"
-		ORDER ||--o{ ORDER_ITEM : "tiene"
-		PRODUCT ||--o{ ORDER_ITEM : "incluido_en"
+    CLIENTE {
+        int id_cliente PK
+        int id_usuario FK
+        datetime fecha_registro
+    }
+
+    REPARTIDOR {
+        int id_repartidor PK
+        int id_usuario FK
+        string vehiculo
+        string licencia_conducir
+    }
+
+    VENDEDOR {
+        int id_vendedor PK
+        int id_usuario FK
+        string nombre_tienda
+        string cuenta_bancaria
+    }
+
+    PRODUCTO {
+        int id_producto PK
+        string nombre
+        text descripcion
+        decimal precio
+        int stock
+        int id_vendedor FK
+    }
+
+    PEDIDO {
+        int id_pedido PK
+        datetime fecha
+        decimal total
+        string direccion_envio
+        int id_cliente FK
+        int id_repartidor FK
+        enum estado
+    }
+
+    DETALLE_PEDIDO {
+        int id_detalle PK
+        int id_pedido FK
+        int id_producto FK
+        int cantidad
+        decimal precio_unitario
+        decimal subtotal
+    }
+
+    PAGO {
+        int id_pago PK
+        int id_pedido FK
+        decimal monto
+        datetime fecha
+        boolean confirmado_por_repartidor
+        boolean pagado_a_vendedor
+        datetime fecha_pago_vendedor
+        enum metodo
+        enum metodo_pago_vendedor
+    }
+
+    HISTORIAL_VENTA {
+        int id_historial PK
+        int id_vendedor FK
+        int id_pedido FK
+        datetime fecha
+        decimal total
+    }
+
+    %% Relaciones
+    USUARIO ||--|| CLIENTE : "1 a 1"
+    USUARIO ||--|| REPARTIDOR : "1 a 1"
+    USUARIO ||--|| VENDEDOR : "1 a 1"
+
+    CLIENTE ||--o{ PEDIDO : "realiza"
+    REPARTIDOR ||--o{ PEDIDO : "entrega"
+    VENDEDOR ||--o{ PRODUCTO : "publica"
+    PRODUCTO ||--o{ DETALLE_PEDIDO : "aparece en"
+    PEDIDO ||--o{ DETALLE_PEDIDO : "contiene"
+    PEDIDO ||--o{ PAGO : "tiene"
+    VENDEDOR ||--o{ HISTORIAL_VENTA : "registra"
+    PEDIDO ||--o{ HISTORIAL_VENTA : "asociado"
+
 ```
 
 Nota: el diagrama Mermaid se puede renderizar en plataformas que soporten Mermaid; si no, la representación ASCII anterior contiene la misma información.
