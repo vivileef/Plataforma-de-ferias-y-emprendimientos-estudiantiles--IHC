@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Plus } from "lucide-react"
 import { ProductList } from "./product-list"
 import { AddProductDialog } from "./add-product-dialog"
+import { EditProductDialog } from "./edit-product-dialog"
 import { ProductDetailDialog } from "./product-detail-dialog"
 import { AppHeader } from "@/components/shared/app-header"
 import { getSession } from "@/components/auth/users"
@@ -14,13 +15,26 @@ import { useLanguage } from "@/components/language-provider"
 
 export function VendedorDashboard() {
   const [showAddProduct, setShowAddProduct] = useState(false)
-  const { products, addProduct, deleteProduct } = useProducts()
+  const [showEditProduct, setShowEditProduct] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<any>(null)
+  const { products, addProduct, updateProduct, deleteProduct } = useProducts()
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [showProductDetail, setShowProductDetail] = useState(false)
 
   const handleAddProduct = (product: any) => {
     addProduct({ ...product, seller: "(Vendedor)" })
     setShowAddProduct(false)
+  }
+
+  const handleEditProduct = (product: any) => {
+    setEditingProduct(product)
+    setShowEditProduct(true)
+  }
+
+  const handleUpdateProduct = (id: string, updatedData: any) => {
+    updateProduct(id, updatedData)
+    setShowEditProduct(false)
+    setEditingProduct(null)
   }
 
   const handleDeleteProduct = (id: string) => {
@@ -101,13 +115,25 @@ export function VendedorDashboard() {
               <CardDescription>Gestiona tu catálogo de productos artesanales</CardDescription>
             </CardHeader>
             <CardContent>
-              <ProductList products={products} onDelete={handleDeleteProduct} onViewDetails={handleViewDetails} />
+              <ProductList 
+                products={products} 
+                onDelete={handleDeleteProduct} 
+                onEdit={handleEditProduct}
+                onViewDetails={handleViewDetails} 
+              />
             </CardContent>
           </Card>
         </div>
       </main>
 
       <AddProductDialog open={showAddProduct} onOpenChange={setShowAddProduct} onAdd={handleAddProduct} />
+
+      <EditProductDialog 
+        open={showEditProduct} 
+        onOpenChange={setShowEditProduct} 
+        onEdit={handleUpdateProduct}
+        product={editingProduct}
+      />
 
       <ProductDetailDialog product={selectedProduct} open={showProductDetail} onOpenChange={setShowProductDetail} />
     </div>
