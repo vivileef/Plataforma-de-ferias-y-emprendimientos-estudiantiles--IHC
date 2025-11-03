@@ -79,16 +79,6 @@ npm run lint
 - lucide-react — iconos
 
 > Consulta `package.json` para la lista completa y versiones exactas.
-
-
-
-
-
-
-
-
-
-
 ## Nota sobre peer-dependencies (vaul + React)
 
 Al instalar dependencias se detectó un conflicto: `vaul@0.9.9` declara peer dependency para React `^16.8 || ^17 || ^18` y el proyecto usa `react@19.2.0`. npm 9+ falla por defecto en estos casos.
