@@ -209,19 +209,6 @@ Relaciones clave:
 - Order 1 — * OrderItem
 - Product 1 — * OrderItem (a través de OrderItem.product_id)
 
-Diagrama ER (ASCII)
-
-```
-User {1} -----< {many} Product
-	[id]              [id]
-	[email]           [title]
-	[name]            [vendor_id -> User.id]
-
-User {1} -----< {many} Order
-Order {1} -----> {many} OrderItem -----> {1} Product
-
-```
-
 Diagrama ER (Mermaid)
 
 ```mermaid
