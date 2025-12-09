@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { CheckCircle2, User, Mail, Lock, Phone } from "lucide-react"
 import Link from "next/link"
 import { addUser } from "@/components/auth/users"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface RegisterFormProps {
   userType: "vendedor" | "comprador"
@@ -22,6 +23,7 @@ interface RegisterFormProps {
 
 export function RegisterForm({ userType, title, description }: RegisterFormProps) {
   const router = useRouter()
+  const isMobile = useIsMobile()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -84,7 +86,7 @@ export function RegisterForm({ userType, title, description }: RegisterFormProps
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className={`w-full ${isMobile ? 'max-w-xs' : 'max-w-md'}`}>
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>

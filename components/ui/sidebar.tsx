@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, VariantProps } from 'class-variance-authority'
-import { PanelLeftIcon } from 'lucide-react'
+import { PanelLeftIcon, Menu, Accessibility, Theme } from 'lucide-react'
 
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
@@ -695,6 +695,73 @@ function SidebarMenuSubButton({
       )}
       {...props}
     />
+  )
+}
+
+function SidebarAccessibilityMenu() {
+  return (
+    <div className="p-4">
+      <h3 className="text-sm font-bold mb-2">Accesibilidad</h3>
+      <ul className="space-y-2">
+        <li>
+          <button className="text-sm hover:underline">Modo alto contraste</button>
+        </li>
+        <li>
+          <button className="text-sm hover:underline">Texto ampliado</button>
+        </li>
+        <li>
+          <button className="text-sm hover:underline">Lectura por voz</button>
+        </li>
+      </ul>
+    </div>
+  )
+}
+
+function SidebarContextualMenu() {
+  return (
+    <div className="p-4">
+      <h3 className="text-sm font-bold mb-2">Opciones del proyecto</h3>
+      <ul className="space-y-2">
+        <li>
+          <button className="text-sm hover:underline">Tema actual</button>
+        </li>
+        <li>
+          <button className="text-sm hover:underline">Configuración avanzada</button>
+        </li>
+      </ul>
+    </div>
+  )
+}
+
+function Sidebar() {
+  return (
+    <aside className="w-64 bg-muted h-full">
+      <div className="p-4">
+        <h2 className="text-lg font-bold">Menú</h2>
+        <ul className="space-y-2">
+          <li>
+            <button className="flex items-center gap-2">
+              <Menu className="h-4 w-4" />
+              <span>Inicio</span>
+            </button>
+          </li>
+          <li>
+            <button className="flex items-center gap-2">
+              <Accessibility className="h-4 w-4" />
+              <span>Accesibilidad</span>
+            </button>
+            <SidebarAccessibilityMenu />
+          </li>
+          <li>
+            <button className="flex items-center gap-2">
+              <Theme className="h-4 w-4" />
+              <span>Contextual</span>
+            </button>
+            <SidebarContextualMenu />
+          </li>
+        </ul>
+      </div>
+    </aside>
   )
 }
 
