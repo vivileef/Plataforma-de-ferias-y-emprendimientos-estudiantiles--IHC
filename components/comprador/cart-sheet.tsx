@@ -2,11 +2,13 @@
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Minus, Plus, Trash2 } from "lucide-react"
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CheckCircle2 } from "lucide-react"
 import { useState } from "react"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { useToast } from "@/hooks/use-toast"
 
 interface CartItem {
   id: string
@@ -27,13 +29,26 @@ interface CartSheetProps {
 
 export function CartSheet({ open, onOpenChange, cart, onRemove, onUpdateQuantity, total }: CartSheetProps) {
   const [showSuccess, setShowSuccess] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const { toast } = useToast()
 
   const handleCheckout = () => {
     setShowSuccess(true)
+    toast({
+      title: "¡Compra realizada con éxito!",
+      description: `Has comprado ${cart.length} producto${cart.length > 1 ? 's' : ''} por €${total.toFixed(2)}`,
+      duration: 5000,
+    })
     setTimeout(() => {
       setShowSuccess(false)
       onOpenChange(false)
+      // Aquí podrías limpiar el carrito si quisieras
     }, 2000)
+  }
+
+  const handleConfirmCheckout = () => {
+    setShowConfirmDialog(false)
+    handleCheckout()
   }
 
   return (
@@ -111,12 +126,29 @@ export function CartSheet({ open, onOpenChange, cart, onRemove, onUpdateQuantity
               <span className="text-foreground">Total:</span>
               <span className="text-primary">€{total.toFixed(2)}</span>
             </div>
-            <Button onClick={handleCheckout} className="w-full" size="lg">
+            <Button onClick={() => setShowConfirmDialog(true)} className="w-full" size="lg">
+              <ShoppingBag className="h-4 w-4 mr-2" />
               Realizar Pedido
             </Button>
           </SheetFooter>
         )}
       </SheetContent>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro que quieres comprar?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vas a realizar una compra de {cart.length} producto{cart.length > 1 ? 's' : ''} por un total de €{total.toFixed(2)}.
+              Esta acción procesará tu pedido.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmCheckout}>Sí, comprar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   )
 }

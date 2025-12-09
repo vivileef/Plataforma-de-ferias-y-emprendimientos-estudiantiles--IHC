@@ -12,6 +12,7 @@ import { AppHeader } from "@/components/shared/app-header"
 import { getSession } from "@/components/auth/users"
 import { useProducts } from "@/components/products-context"
 import { useLanguage } from "@/components/language-provider"
+import { useToast } from "@/hooks/use-toast"
 
 export function VendedorDashboard() {
   const [showAddProduct, setShowAddProduct] = useState(false)
@@ -20,10 +21,16 @@ export function VendedorDashboard() {
   const { products, addProduct, updateProduct, deleteProduct } = useProducts()
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [showProductDetail, setShowProductDetail] = useState(false)
+  const { toast } = useToast()
 
   const handleAddProduct = (product: any) => {
     addProduct({ ...product, seller: "(Vendedor)" })
     setShowAddProduct(false)
+    toast({
+      title: "¡Producto publicado!",
+      description: `${product.name} ha sido añadido a tu catálogo exitosamente.`,
+      duration: 4000,
+    })
   }
 
   const handleEditProduct = (product: any) => {
@@ -35,6 +42,11 @@ export function VendedorDashboard() {
     updateProduct(id, updatedData)
     setShowEditProduct(false)
     setEditingProduct(null)
+    toast({
+      title: "¡Producto actualizado!",
+      description: `Los cambios en ${updatedData.name || 'el producto'} se han guardado correctamente.`,
+      duration: 4000,
+    })
   }
 
   const handleDeleteProduct = (id: string) => {

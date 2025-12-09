@@ -14,6 +14,7 @@ import { getSession } from "@/components/auth/users"
 import { CategorySidebar } from "@/components/shared/category-sidebar"
 import { useProducts } from "@/components/products-context"
 import { useLanguage } from "@/components/language-provider"
+import { useToast } from "@/hooks/use-toast"
 
 // Products come from shared ProductsProvider (persisted in localStorage)
 
@@ -27,13 +28,24 @@ export function CompradorDashboard() {
   const { products } = useProducts()
   const { t } = useLanguage()
   const searchRef = useRef<HTMLInputElement | null>(null)
+  const { toast } = useToast()
 
   const handleAddToCart = (product: any) => {
     const existingItem = cart.find((item) => item.id === product.id)
     if (existingItem) {
       setCart(cart.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)))
+      toast({
+        title: "¡Añadido al carrito!",
+        description: `${product.name} - Cantidad actualizada a ${existingItem.quantity + 1}`,
+        duration: 3000,
+      })
     } else {
       setCart([...cart, { ...product, quantity: 1 }])
+      toast({
+        title: "¡Producto añadido al carrito!",
+        description: `${product.name} - €${product.price.toFixed(2)}`,
+        duration: 3000,
+      })
     }
   }
 
