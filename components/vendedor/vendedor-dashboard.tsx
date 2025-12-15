@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus } from "lucide-react"
+import { Plus, AlertCircle } from "lucide-react"
 import { ProductList } from "./product-list"
 import { AddProductDialog } from "./add-product-dialog"
 import { EditProductDialog } from "./edit-product-dialog"
 import { ProductDetailDialog } from "./product-detail-dialog"
+import { ReclamosVendedor } from "./reclamos-vendedor"
 import { AppHeader } from "@/components/shared/app-header"
 import { getSession } from "@/components/auth/users"
 import { useProducts } from "@/components/products-context"
@@ -17,6 +18,7 @@ import { CategorySidebar } from "@/components/shared/category-sidebar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export function VendedorDashboard() {
   const [showAddProduct, setShowAddProduct] = useState(false)
@@ -26,7 +28,32 @@ export function VendedorDashboard() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [showProductDetail, setShowProductDetail] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [activeTab, setActiveTab] = useState("productos")
+  const [reclamosPendientes, setReclamosPendientes] = useState(0)
   const { toast } = useToast()
+
+  // Cargar número de reclamos pendientes
+  useEffect(() => {
+    const loadReclamosPendientes = () => {
+      try {
+        const session = getSession()
+        if (!session?.email) return
+
+        const allReclamos = JSON.parse(localStorage.getItem("marketplace_reclamos") || "[]")
+        const misReclamos = allReclamos.filter((r: any) => 
+          r.vendedorEmail === session.email && r.estado === "pendiente"
+        )
+        setReclamosPendientes(misReclamos.length)
+      } catch (error) {
+        console.error("Error al cargar reclamos:", error)
+      }
+    }
+
+    loadReclamosPendientes()
+    // Actualizar cada 30 segundos
+    const interval = setInterval(loadReclamosPendientes, 30000)
+    return () => clearInterval(interval)
+  }, [activeTab])
 
   // Filtrar productos por categoría
   const filteredProducts = products.filter(product => 
@@ -174,43 +201,66 @@ export function VendedorDashboard() {
             </Tooltip>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Total Productos</CardDescription>
-                <CardTitle className="text-3xl">{filteredProducts.length}</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Stock Total</CardDescription>
-                <CardTitle className="text-3xl">{filteredProducts.reduce((acc, p) => acc + p.stock, 0)}</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Valor Inventario</CardDescription>
-                <CardTitle className="text-3xl">
-                  €{filteredProducts.reduce((acc, p) => acc + p.price * p.stock, 0).toFixed(2)}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-          </div>
+          {/* Tabs de navegación */}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsTrigger value="productos">
+                Mis Productos
+              </TabsTrigger>
+              <TabsTrigger value="reclamos" className="relative">
+                Reclamos
+                {reclamosPendientes > 0 && (
+                  <span className="ml-2 px-2 py-0.5 rounded-full bg-red-500 text-white text-xs font-semibold">
+                    {reclamosPendientes}
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Mis Productos</CardTitle>
-              <CardDescription>Gestiona tu catálogo de productos artesanales</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ProductList 
-                products={filteredProducts} 
-                onDelete={handleDeleteProduct} 
-                onEdit={handleEditProduct}
-                onViewDetails={handleViewDetails} 
-              />
-            </CardContent>
-          </Card>
+            <TabsContent value="productos" className="space-y-6 mt-6">
+              <div className="grid sm:grid-cols-3 gap-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardDescription>Total Productos</CardDescription>
+                    <CardTitle className="text-3xl">{filteredProducts.length}</CardTitle>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardDescription>Stock Total</CardDescription>
+                    <CardTitle className="text-3xl">{filteredProducts.reduce((acc, p) => acc + p.stock, 0)}</CardTitle>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardDescription>Valor Inventario</CardDescription>
+                    <CardTitle className="text-3xl">
+                      €{filteredProducts.reduce((acc, p) => acc + p.price * p.stock, 0).toFixed(2)}
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Mis Productos</CardTitle>
+                  <CardDescription>Gestiona tu catálogo de productos artesanales</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ProductList 
+                    products={filteredProducts} 
+                    onDelete={handleDeleteProduct} 
+                    onEdit={handleEditProduct}
+                    onViewDetails={handleViewDetails} 
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="reclamos" className="mt-6">
+              <ReclamosVendedor />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
       </div>

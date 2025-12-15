@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { AlertCircle, Upload, X, CheckCircle } from "lucide-react"
+import { AlertCircle, Upload, X, CheckCircle, ArrowLeft } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { getAllUsers, getSession } from "@/components/auth/users"
+import Link from "next/link"
 
 interface ReclamoFormData {
   numeroPedido: string
@@ -160,6 +161,14 @@ export function ReclamosForm() {
   if (submitSuccess) {
     return (
       <div className="max-w-2xl mx-auto p-4">
+        <div className="mb-4">
+          <Link href="/comprador/dashboard">
+            <Button variant="ghost" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Volver al Dashboard
+            </Button>
+          </Link>
+        </div>
         <Card className="border-green-200">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
@@ -189,12 +198,19 @@ export function ReclamosForm() {
               <p><strong>Te contactaremos por:</strong> {formData.email}</p>
             </div>
 
-            <Button 
-              onClick={() => setSubmitSuccess(false)} 
-              className="w-full"
-            >
-              Enviar Otro Reclamo
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => setSubmitSuccess(false)} 
+                className="flex-1"
+              >
+                Enviar Otro Reclamo
+              </Button>
+              <Link href="/comprador/dashboard" className="flex-1">
+                <Button variant="outline" className="w-full">
+                  Ir al Dashboard
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -203,6 +219,14 @@ export function ReclamosForm() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
+      <div className="mb-4">
+        <Link href="/comprador/dashboard">
+          <Button variant="ghost" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Volver al Dashboard
+          </Button>
+        </Link>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Formulario de Reclamos y Devoluciones</CardTitle>
