@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShoppingCart, Menu, Search, AlertCircle } from "lucide-react"
+import { ShoppingCart, Menu, Search, AlertCircle, Package } from "lucide-react"
 import Link from "next/link"
 import { ProductGrid } from "./product-grid"
 import { CartSheet } from "./cart-sheet"
@@ -184,7 +184,7 @@ export function CompradorDashboard() {
                   return displayName ? <p className="mt-2 text-sm">Hola <span className="font-medium">{displayName}</span>, ¡suerte en las compras!</p> : null
                 })()}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link href="/comprador/reclamos">
@@ -196,6 +196,20 @@ export function CompradorDashboard() {
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Reportar problemas con pedidos</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link href="/comprador/cancelacion-pedidos">
+                      <Button variant="outline" className="gap-2">
+                        <Package className="h-4 w-4" />
+                        Cancelar/Modificar
+                      </Button>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Cancelar o modificar pedidos</p>
                   </TooltipContent>
                 </Tooltip>
                 
