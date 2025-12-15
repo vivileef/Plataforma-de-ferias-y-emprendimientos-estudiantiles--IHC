@@ -231,15 +231,12 @@ Descripción textual del modelo de datos que la aplicación usa o debería usar 
 
 ---
 
-Diagrama ER (Mermaid)
-
-```mermaid
 erDiagram
     USUARIO {
         int id_usuario PK
         string nombre
         string email
-        string contraseña
+        string contrasena
         string telefono
         string direccion
     }
@@ -267,8 +264,8 @@ erDiagram
     PRODUCTO {
         int id_producto PK
         string nombre
-        text descripcion
-        decimal precio
+        string descripcion
+        float precio
         int stock
         int id_vendedor FK
     }
@@ -276,11 +273,11 @@ erDiagram
     PEDIDO {
         int id_pedido PK
         datetime fecha
-        decimal total
+        float total
         string direccion_envio
+        string estado
         int id_cliente FK
         int id_repartidor FK
-        enum estado
     }
 
     DETALLE_PEDIDO {
@@ -288,20 +285,20 @@ erDiagram
         int id_pedido FK
         int id_producto FK
         int cantidad
-        decimal precio_unitario
-        decimal subtotal
+        float precio_unitario
+        float subtotal
     }
 
     PAGO {
         int id_pago PK
         int id_pedido FK
-        decimal monto
+        float monto
         datetime fecha
         boolean confirmado_por_repartidor
         boolean pagado_a_vendedor
         datetime fecha_pago_vendedor
-        enum metodo
-        enum metodo_pago_vendedor
+        string metodo
+        string metodo_pago_vendedor
     }
 
     HISTORIAL_VENTA {
@@ -309,24 +306,26 @@ erDiagram
         int id_vendedor FK
         int id_pedido FK
         datetime fecha
-        decimal total
+        float total
     }
 
     %% Relaciones
-    USUARIO ||--|| CLIENTE : "1 a 1"
-    USUARIO ||--|| REPARTIDOR : "1 a 1"
-    USUARIO ||--|| VENDEDOR : "1 a 1"
+    USUARIO ||--|| CLIENTE : tiene
+    USUARIO ||--|| REPARTIDOR : tiene
+    USUARIO ||--|| VENDEDOR : tiene
 
-    CLIENTE ||--o{ PEDIDO : "realiza"
-    REPARTIDOR ||--o{ PEDIDO : "entrega"
-    VENDEDOR ||--o{ PRODUCTO : "publica"
-    PRODUCTO ||--o{ DETALLE_PEDIDO : "aparece en"
-    PEDIDO ||--o{ DETALLE_PEDIDO : "contiene"
-    PEDIDO ||--o{ PAGO : "tiene"
-    VENDEDOR ||--o{ HISTORIAL_VENTA : "registra"
-    PEDIDO ||--o{ HISTORIAL_VENTA : "asociado"
+    CLIENTE ||--o{ PEDIDO : realiza
+    REPARTIDOR ||--o{ PEDIDO : entrega
+    VENDEDOR ||--o{ PRODUCTO : publica
 
-```
+    PEDIDO ||--o{ DETALLE_PEDIDO : contiene
+    PRODUCTO ||--o{ DETALLE_PEDIDO : aparece_en
+
+    PEDIDO ||--o{ PAGO : genera
+
+    VENDEDOR ||--o{ HISTORIAL_VENTA : registra
+    PEDIDO ||--|| HISTORIAL_VENTA : asociado
+---
 
 
 
