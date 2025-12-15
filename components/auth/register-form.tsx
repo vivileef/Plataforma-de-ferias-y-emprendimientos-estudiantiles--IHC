@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,6 +14,7 @@ import { CheckCircle2, User, Mail, Lock, Phone } from "lucide-react"
 import Link from "next/link"
 import { addUser } from "@/components/auth/users"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Progress } from "@/components/ui/progress"
 
 interface RegisterFormProps {
   userType: "vendedor" | "comprador"
@@ -35,6 +36,25 @@ export function RegisterForm({ userType, title, description }: RegisterFormProps
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [errors, setErrors] = useState<string[]>([])
+  const [progress, setProgress] = useState(0)
+
+  // Calculate progress based on filled fields
+  useEffect(() => {
+    const fields = [
+      formData.name,
+      formData.email,
+      formData.phone,
+      formData.password,
+      formData.confirmPassword,
+      formData.acceptTerms,
+    ]
+    const filledFields = fields.filter((field) => {
+      if (typeof field === 'boolean') return field
+      return field && field.toString().trim() !== ""
+    }).length
+    const newProgress = (filledFields / fields.length) * 100
+    setProgress(newProgress)
+  }, [formData])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -93,6 +113,14 @@ export function RegisterForm({ userType, title, description }: RegisterFormProps
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
+          {/* Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium text-muted-foreground">Progreso del registro</span>
+              <span className="font-bold text-primary">{Math.round(progress)}%</span>
+            </div>
+            <Progress value={progress} className="h-2.5" />
+          </div>
           {success && (
             <Alert className="bg-primary/10 border-primary">
               <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -214,7 +242,7 @@ export function RegisterForm({ userType, title, description }: RegisterFormProps
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" disabled={isLoading || success}>
+          <Button type="submit" className="w-full" disabled={isLoading || success || progress < 100}>
             {isLoading ? "Registrando..." : "Crear Cuenta"}
           </Button>
 

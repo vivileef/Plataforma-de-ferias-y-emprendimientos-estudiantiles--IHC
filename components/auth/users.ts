@@ -172,3 +172,23 @@ export function updateUserProfile(oldEmail: string, updates: Partial<AppUser>): 
     return { ok: false, error: 'Error al actualizar el usuario' }
   }
 }
+
+// Export readUsers for admin panel
+export function getAllUsers(): AppUser[] {
+  return readUsers()
+}
+
+export function deleteUser(email: string): { ok: boolean; error?: string } {
+  try {
+    const users = readUsers()
+    const filtered = users.filter((u) => u.email.toLowerCase() !== email.toLowerCase())
+    if (filtered.length === users.length) {
+      return { ok: false, error: 'Usuario no encontrado' }
+    }
+    writeUsers(filtered)
+    return { ok: true }
+  } catch (e) {
+    console.error('Failed to delete user', e)
+    return { ok: false, error: 'Error al eliminar el usuario' }
+  }
+}

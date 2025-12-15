@@ -10,6 +10,7 @@ import { ProductDetailDialog } from "./product-detail-dialog"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { AppHeader } from "@/components/shared/app-header"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { getSession } from "@/components/auth/users"
 import { CategorySidebar } from "@/components/shared/category-sidebar"
 import { useProducts } from "@/components/products-context"
@@ -77,7 +78,7 @@ export function CompradorDashboard() {
     return matchesSearch && matchesCategory
   })
 
-  // Keyboard shortcuts: '/' focuses search, 'c' toggles cart
+  // Keyboard shortcuts: '/' or 'Ctrl+F' focuses search, 'c' toggles cart, 'Esc' clears search/closes dialogs, numbers 1-6 filter by category
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       // Don't trigger shortcuts while the user is typing in an input/textarea or contentEditable.
@@ -88,20 +89,50 @@ export function CompradorDashboard() {
         (tag === "INPUT" || tag === "TEXTAREA" || active.isContentEditable || active.getAttribute?.("role") === "textbox")
       )
 
-      if (e.key === "/" && !(e.ctrlKey || e.metaKey || e.altKey) && !isTyping) {
+      // '/' or 'Ctrl+F' to focus search
+      if ((e.key === "/" && !(e.ctrlKey || e.metaKey || e.altKey) && !isTyping) || 
+          ((e.ctrlKey || e.metaKey) && e.key === "f")) {
         e.preventDefault()
         const el = document.getElementById("search-input") as HTMLInputElement | null
         el?.focus()
+        el?.select() // Select all text in search input
       }
+      // 'c' to toggle cart
       if (e.key === "c" && !(e.ctrlKey || e.metaKey || e.altKey) && !isTyping) {
         setShowCart((s) => !s)
+      }
+      // 'Esc' to clear search or close modals
+      if (e.key === "Escape") {
+        if (showProductDetail) {
+          setShowProductDetail(false)
+        } else if (showCart) {
+          setShowCart(false)
+        } else if (searchQuery) {
+          setSearchQuery("")
+          const el = document.getElementById("search-input") as HTMLInputElement | null
+          el?.blur()
+        }
+      }
+      // Number keys 1-7 for category filters (when not typing)
+      if (!isTyping && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const categories = ["all", "Artesanía", "Alimentos", "Cosmética", "Textil", "Decoración", "Joyería"]
+        const num = parseInt(e.key)
+        if (num >= 1 && num <= 7) {
+          e.preventDefault()
+          setSelectedCategory(categories[num - 1])
+        }
+      }
+      // 'a' to show all categories
+      if (e.key === "a" && !(e.ctrlKey || e.metaKey || e.altKey) && !isTyping) {
+        setSelectedCategory("all")
       }
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [])
+  }, [showProductDetail, showCart, searchQuery])
 
   return (
+    <TooltipProvider>
     <div className="min-h-screen flex flex-col">
       {(() => {
         const session = typeof window !== "undefined" ? getSession() : null
@@ -112,13 +143,20 @@ export function CompradorDashboard() {
       <div className="flex flex-1">
         <Sheet>
           <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden fixed bottom-4 left-4 z-40 h-12 w-12 rounded-full shadow-lg"
-            >
-              <Menu className="h-6 w-6" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden fixed bottom-4 left-4 z-40 h-12 w-12 rounded-full shadow-lg"
+                >
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Abrir menú de categorías</p>
+              </TooltipContent>
+            </Tooltip>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64">
             <CategorySidebar selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
@@ -145,6 +183,8 @@ export function CompradorDashboard() {
                   return displayName ? <p className="mt-2 text-sm">Hola <span className="font-medium">{displayName}</span>, ¡suerte en las compras!</p> : null
                 })()}
               </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
               <Button onClick={() => setShowCart(true)} className="gap-2 relative">
                 <ShoppingCart className="h-4 w-4" />
                 {t("viewCart")}
@@ -154,11 +194,18 @@ export function CompradorDashboard() {
                   </span>
                 )}
               </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Ver carrito de compras (Atajo: C)</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
 
             {/* Search */}
             <Card>
               <CardContent className="pt-6">
+                <Tooltip>
+                  <TooltipTrigger asChild>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -170,6 +217,11 @@ export function CompradorDashboard() {
                     className="pl-10"
                   />
                 </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Buscar productos (Atajo: Ctrl+F o /)</p>
+                  </TooltipContent>
+                </Tooltip>
               </CardContent>
             </Card>
 
@@ -195,5 +247,6 @@ export function CompradorDashboard() {
         onAddToCart={handleAddToCart}
       />
     </div>
+    </TooltipProvider>
   )
 }

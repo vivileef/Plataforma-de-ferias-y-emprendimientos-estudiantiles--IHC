@@ -1,44 +1,91 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, Package } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UsersTable } from "./users-table"
 import { ProductsTable } from "./products-table"
 import { AppHeader } from "@/components/shared/app-header"
+import { getAllUsers, deleteUser, AppUser } from "@/components/auth/users"
+import { useProducts } from "@/components/products-context"
+import { useToast } from "@/hooks/use-toast"
 
 export function AdminDashboard() {
-  const [users, setUsers] = useState([
-    { id: "1", name: "María García", email: "maria@email.com", role: "Vendedor", status: "Activo" },
-    { id: "2", name: "Carlos Rodríguez", email: "carlos@email.com", role: "Comprador", status: "Activo" },
-    { id: "3", name: "Juan Martínez", email: "juan@email.com", role: "Vendedor", status: "Activo" },
-    { id: "4", name: "Ana López", email: "ana@email.com", role: "Vendedor", status: "Inactivo" },
-  ])
+  const { products, deleteProduct } = useProducts()
+  const { toast } = useToast()
+  const [users, setUsers] = useState<AppUser[]>([])
 
-  const [products, setProducts] = useState([
-    { id: "1", name: "Cesta de Mimbre Artesanal", seller: "María García", category: "Artesanía", status: "Publicado" },
-    { id: "2", name: "Miel Orgánica 500g", seller: "Juan Martínez", category: "Alimentos", status: "Publicado" },
-    { id: "3", name: "Jabón Natural de Lavanda", seller: "Ana López", category: "Cosmética", status: "Pendiente" },
-    { id: "4", name: "Bufanda de Lana Tejida", seller: "María García", category: "Textil", status: "Publicado" },
-  ])
+  // Load users from localStorage
+  useEffect(() => {
+    setUsers(getAllUsers())
+  }, [])
+
+  // Transform users to match the expected format for UsersTable
+  const transformedUsers = users.map((user) => ({
+    id: user.email, // use email as ID
+    name: user.name || "Sin nombre",
+    email: user.email,
+    role: user.role === "vendedor" ? "Vendedor" : user.role === "comprador" ? "Comprador" : "Administrador",
+    status: "Activo" as const, // all users are active by default
+  }))
+
+  // Transform products to match the expected format for ProductsTable
+  const transformedProducts = products.map((product) => ({
+    id: product.id,
+    name: product.name,
+    seller: product.seller,
+    category: product.category,
+    status: product.stock > 0 ? ("Publicado" as const) : ("Pendiente" as const),
+  }))
 
   const handleDeleteUser = (id: string) => {
-    setUsers(users.filter((u) => u.id !== id))
+    // Prevent admin from deleting themselves
+    if (id === "admin@gmail.com") {
+      toast({
+        title: "Acción no permitida",
+        description: "No puedes eliminar tu propia cuenta de administrador",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const result = deleteUser(id) // id is email
+    if (result.ok) {
+      setUsers(getAllUsers())
+      toast({
+        title: "Usuario eliminado",
+        description: "El usuario ha sido eliminado correctamente",
+      })
+    } else {
+      toast({
+        title: "Error",
+        description: result.error || "No se pudo eliminar el usuario",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleToggleUserStatus = (id: string) => {
-    setUsers(users.map((u) => (u.id === id ? { ...u, status: u.status === "Activo" ? "Inactivo" : "Activo" } : u)))
+    toast({
+      title: "Función no disponible",
+      description: "La activación/desactivación de usuarios estará disponible próximamente",
+    })
   }
 
   const handleDeleteProduct = (id: string) => {
-    setProducts(products.filter((p) => p.id !== id))
+    deleteProduct(id)
+    toast({
+      title: "Producto eliminado",
+      description: "El producto ha sido eliminado correctamente",
+    })
   }
 
   const handleToggleProductStatus = (id: string) => {
-    setProducts(
-      products.map((p) => (p.id === id ? { ...p, status: p.status === "Publicado" ? "Pendiente" : "Publicado" } : p)),
-    )
+    toast({
+      title: "Función no disponible",
+      description: "La activación/desactivación de productos estará disponible próximamente",
+    })
   }
 
   return (
@@ -59,19 +106,19 @@ export function AdminDashboard() {
             <Card>
               <CardHeader className="pb-3">
                 <CardDescription>Total Usuarios</CardDescription>
-                <CardTitle className="text-3xl">{users.length}</CardTitle>
+                <CardTitle className="text-3xl">{transformedUsers.length}</CardTitle>
               </CardHeader>
             </Card>
             <Card>
               <CardHeader className="pb-3">
                 <CardDescription>Total Productos</CardDescription>
-                <CardTitle className="text-3xl">{products.length}</CardTitle>
+                <CardTitle className="text-3xl">{transformedProducts.length}</CardTitle>
               </CardHeader>
             </Card>
             <Card>
               <CardHeader className="pb-3">
                 <CardDescription>Usuarios Activos</CardDescription>
-                <CardTitle className="text-3xl">{users.filter((u) => u.status === "Activo").length}</CardTitle>
+                <CardTitle className="text-3xl">{transformedUsers.filter((u) => u.status === "Activo").length}</CardTitle>
               </CardHeader>
             </Card>
           </div>
@@ -96,7 +143,7 @@ export function AdminDashboard() {
                   <CardDescription>Administra los usuarios registrados en la plataforma</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <UsersTable users={users} onDelete={handleDeleteUser} onToggleStatus={handleToggleUserStatus} />
+                  <UsersTable users={transformedUsers} onDelete={handleDeleteUser} onToggleStatus={handleToggleUserStatus} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -109,7 +156,7 @@ export function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <ProductsTable
-                    products={products}
+                    products={transformedProducts}
                     onDelete={handleDeleteProduct}
                     onToggleStatus={handleToggleProductStatus}
                   />

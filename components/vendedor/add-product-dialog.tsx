@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Progress } from "@/components/ui/progress"
 
 interface AddProductDialogProps {
   open: boolean
@@ -31,15 +32,34 @@ export function AddProductDialog({ open, onOpenChange, onAdd }: AddProductDialog
     category: "",
     description: "",
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [progress, setProgress] = useState(0)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Calculate progress based on filled fields
+  useEffect(() => {
+    const fields = [
+      formData.name,
+      formData.price,
+      formData.stock,
+      formData.category,
+      formData.description,
+    ]
+    const filledFields = fields.filter(field => field && field.toString().trim() !== "").length
+    const newProgress = (filledFields / fields.length) * 100
+    setProgress(newProgress)
+  }, [formData])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
+
     onAdd({
       ...formData,
       price: Number.parseFloat(formData.price),
       stock: Number.parseInt(formData.stock),
       image: `/placeholder.svg?height=200&width=200&query=${encodeURIComponent(formData.name)}`,
     })
+    
     setFormData({
       name: "",
       price: "",
@@ -47,6 +67,7 @@ export function AddProductDialog({ open, onOpenChange, onAdd }: AddProductDialog
       category: "",
       description: "",
     })
+    setIsSubmitting(false)
   }
 
   return (
@@ -57,7 +78,19 @@ export function AddProductDialog({ open, onOpenChange, onAdd }: AddProductDialog
             <DialogTitle>Añadir Nuevo Producto</DialogTitle>
             <DialogDescription>Completa la información de tu producto artesanal</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+
+          {/* Progress Bar - Always visible */}
+          <div className="px-6 pt-2">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium text-muted-foreground">Progreso del formulario</span>
+                <span className="font-bold text-primary">{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} className="h-2.5" />
+            </div>
+          </div>
+
+          <div className="grid gap-4 py-4 px-6">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre del Producto</Label>
               <Input
@@ -131,10 +164,12 @@ export function AddProductDialog({ open, onOpenChange, onAdd }: AddProductDialog
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Cancelar
             </Button>
-            <Button type="submit">Añadir Producto</Button>
+            <Button type="submit" disabled={isSubmitting || progress < 100}>
+              {isSubmitting ? "Publicando..." : "Añadir Producto"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
