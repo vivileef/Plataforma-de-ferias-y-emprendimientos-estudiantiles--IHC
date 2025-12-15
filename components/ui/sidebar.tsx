@@ -3,7 +3,13 @@
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, VariantProps } from 'class-variance-authority'
-import { PanelLeftIcon, Menu, Accessibility, Theme } from 'lucide-react'
+import {
+  PanelLeftIcon,
+  Menu,
+  Accessibility,
+  Theme,
+  HelpCircle,
+} from 'lucide-react'
 
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
@@ -291,7 +297,7 @@ function SidebarRail({ className, ...props }: React.ComponentProps<'button'>) {
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        'hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex',
+        'hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:w-0.5 after:h-full after:bg-current',
         'in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize',
         '[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
         'hover:group-data-[collapsible=offcanvas]:bg-sidebar group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full',
@@ -717,22 +723,6 @@ function SidebarAccessibilityMenu() {
   )
 }
 
-function SidebarContextualMenu() {
-  return (
-    <div className="p-4">
-      <h3 className="text-sm font-bold mb-2">Opciones del proyecto</h3>
-      <ul className="space-y-2">
-        <li>
-          <button className="text-sm hover:underline">Tema actual</button>
-        </li>
-        <li>
-          <button className="text-sm hover:underline">Configuración avanzada</button>
-        </li>
-      </ul>
-    </div>
-  )
-}
-
 function Sidebar() {
   return (
     <aside className="w-64 bg-muted h-full">
@@ -757,7 +747,12 @@ function Sidebar() {
               <Theme className="h-4 w-4" />
               <span>Contextual</span>
             </button>
-            <SidebarContextualMenu />
+          </li>
+          <li>
+            <button className="flex items-center gap-2">
+              <HelpCircle className="h-4 w-4" />
+              <span>Ayuda</span>
+            </button>
           </li>
         </ul>
       </div>

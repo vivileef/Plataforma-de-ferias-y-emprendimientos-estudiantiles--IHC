@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShoppingCart, Menu, Search } from "lucide-react"
+import { ShoppingCart, Menu, Search, AlertCircle } from "lucide-react"
+import Link from "next/link"
 import { ProductGrid } from "./product-grid"
 import { CartSheet } from "./cart-sheet"
 import { ProductDetailDialog } from "./product-detail-dialog"
@@ -183,22 +184,38 @@ export function CompradorDashboard() {
                   return displayName ? <p className="mt-2 text-sm">Hola <span className="font-medium">{displayName}</span>, ¡suerte en las compras!</p> : null
                 })()}
               </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-              <Button onClick={() => setShowCart(true)} className="gap-2 relative">
-                <ShoppingCart className="h-4 w-4" />
-                {t("viewCart")}
-                {cartItemCount > 0 && (
-                  <span className="ml-1 px-2 py-0.5 rounded-full bg-primary-foreground text-primary text-xs font-semibold">
-                    {cartItemCount}
-                  </span>
-                )}
-              </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Ver carrito de compras (Atajo: C)</p>
-                </TooltipContent>
-              </Tooltip>
+              <div className="flex gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link href="/comprador/reclamos">
+                      <Button variant="outline" className="gap-2">
+                        <AlertCircle className="h-4 w-4" />
+                        Reclamos
+                      </Button>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Reportar problemas con pedidos</p>
+                  </TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={() => setShowCart(true)} className="gap-2 relative">
+                      <ShoppingCart className="h-4 w-4" />
+                      {t("viewCart")}
+                      {cartItemCount > 0 && (
+                        <span className="ml-1 px-2 py-0.5 rounded-full bg-primary-foreground text-primary text-xs font-semibold">
+                          {cartItemCount}
+                        </span>
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Ver carrito de compras (Atajo: C)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
 
             {/* Search */}
