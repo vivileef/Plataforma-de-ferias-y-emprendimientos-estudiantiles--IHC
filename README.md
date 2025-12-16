@@ -140,98 +140,23 @@ Recomendación: Para desarrollo rápido puedes mantener `--legacy-peer-deps`, pe
 
 Descripción textual del modelo de datos que la aplicación usa o debería usar cuando se implemente backend/DB.
 
-1. USUARIO
-   - id_usuario (PK)
-   - nombre
-   - email (único)
-   - contraseña (almacenar hashed en backend real)
-   - telefono
-   - direccion
-   - Descripción: representa la cuenta de una persona en el sistema; puede tener un perfil específico (cliente, repartidor o vendedor).
-
-2. CLIENTE
-   - id_cliente (PK)
-   - id_usuario (FK -> USUARIO)
-   - fecha_registro
-   - Descripción: perfil que representa a compradores que realizan pedidos.
-
-3. REPARTIDOR
-   - id_repartidor (PK)
-   - id_usuario (FK -> USUARIO)
-   - vehiculo
-   - licencia_conducir
-   - Descripción: perfil responsable de la entrega de pedidos.
-
-4. VENDEDOR
-   - id_vendedor (PK)
-   - id_usuario (FK -> USUARIO)
-   - nombre_tienda
-   - cuenta_bancaria
-   - Descripción: perfil que publica productos y recibe ventas.
-
-5. PRODUCTO
-   - id_producto (PK)
-   - nombre
-   - descripcion
-   - precio
-   - stock
-   - id_vendedor (FK -> VENDEDOR)
-   - Descripción: items que los vendedores publican para la venta.
-
-6. PEDIDO
-   - id_pedido (PK)
-   - fecha
-   - total
-   - direccion_envio
-   - id_cliente (FK -> CLIENTE)
-   - id_repartidor (FK -> REPARTIDOR)
-   - estado (enum)
-   - Descripción: representa una orden realizada por un cliente que contiene uno o más detalles de pedido.
-
-7. DETALLE_PEDIDO
-   - id_detalle (PK)
-   - id_pedido (FK -> PEDIDO)
-   - id_producto (FK -> PRODUCTO)
-   - cantidad
-   - precio_unitario
-   - subtotal
-   - Descripción: línea de pedido que relaciona un producto con una cantidad y precio en un pedido.
-
-8. PAGO
-   - id_pago (PK)
-   - id_pedido (FK -> PEDIDO)
-   - monto
-   - fecha
-   - confirmado_por_repartidor (boolean)
-   - pagado_a_vendedor (boolean)
-   - fecha_pago_vendedor
-   - metodo (enum)
-   - metodo_pago_vendedor (enum)
-   - Descripción: información de pago asociada a un pedido.
-
-9. HISTORIAL_VENTA
-   - id_historial (PK)
-   - id_vendedor (FK -> VENDEDOR)
-   - id_pedido (FK -> PEDIDO)
-   - fecha
-   - total
-   - Descripción: registro de ventas por vendedor (resumen/registro contable).
-
----
-
-### 🔗 Relaciones clave (redactadas)
-
-- Un `USUARIO` puede tener exactamente un `CLIENTE`, `REPARTIDOR` o `VENDEDOR` (perfiles 1-a-1 según el tipo de cuenta).
-- Un `CLIENTE` puede realizar muchos `PEDIDO` (1 a N).
-- Un `REPARTIDOR` puede entregar muchos `PEDIDO` (1 a N).
-- Un `VENDEDOR` publica muchos `PRODUCTO` (1 a N).
-- Un `PEDIDO` contiene muchos `DETALLE_PEDIDO` (1 a N); cada `DETALLE_PEDIDO` está asociado a un único `PRODUCTO`.
-- Un `PEDIDO` puede tener uno o más `PAGO` asociados (según flujo), y un `PAGO` pertenece a un único `PEDIDO`.
-- Un `VENDEDOR` tiene muchos registros en `HISTORIAL_VENTA` (1 a N), y cada registro apunta a un `PEDIDO`.
-
----
-
 erDiagram
+    USUARIO ||--|| CLIENTE : tiene
+    USUARIO ||--|| REPARTIDOR : tiene
+    USUARIO ||--|| VENDEDOR : tiene
+
+    CLIENTE ||--o{ PEDIDO : realiza
+    REPARTIDOR ||--o{ PEDIDO : entrega
+    VENDEDOR ||--o{ PRODUCTO : publica
+
+    PEDIDO ||--o{ DETALLE_PEDIDO : contiene
+    PRODUCTO ||--o{ DETALLE_PEDIDO : aparece_en
+
+    PEDIDO ||--o{ PAGO : genera
+    VENDEDOR ||--o{ HISTORIAL_VENTA : registra
+    PEDIDO ||--|| HISTORIAL_VENTA : asociado
+
+
     USUARIO {
         int id_usuario PK
         string nombre
@@ -309,23 +234,23 @@ erDiagram
         float total
     }
 
-    %% Relaciones
-    USUARIO ||--|| CLIENTE : tiene
-    USUARIO ||--|| REPARTIDOR : tiene
-    USUARIO ||--|| VENDEDOR : tiene
 
-    CLIENTE ||--o{ PEDIDO : realiza
-    REPARTIDOR ||--o{ PEDIDO : entrega
-    VENDEDOR ||--o{ PRODUCTO : publica
 
-    PEDIDO ||--o{ DETALLE_PEDIDO : contiene
-    PRODUCTO ||--o{ DETALLE_PEDIDO : aparece_en
-
-    PEDIDO ||--o{ PAGO : genera
-
-    VENDEDOR ||--o{ HISTORIAL_VENTA : registra
-    PEDIDO ||--|| HISTORIAL_VENTA : asociado
 ---
+
+### 🔗 Relaciones clave (redactadas)
+
+- Un `USUARIO` puede tener exactamente un `CLIENTE`, `REPARTIDOR` o `VENDEDOR` (perfiles 1-a-1 según el tipo de cuenta).
+- Un `CLIENTE` puede realizar muchos `PEDIDO` (1 a N).
+- Un `REPARTIDOR` puede entregar muchos `PEDIDO` (1 a N).
+- Un `VENDEDOR` publica muchos `PRODUCTO` (1 a N).
+- Un `PEDIDO` contiene muchos `DETALLE_PEDIDO` (1 a N); cada `DETALLE_PEDIDO` está asociado a un único `PRODUCTO`.
+- Un `PEDIDO` puede tener uno o más `PAGO` asociados (según flujo), y un `PAGO` pertenece a un único `PEDIDO`.
+- Un `VENDEDOR` tiene muchos registros en `HISTORIAL_VENTA` (1 a N), y cada registro apunta a un `PEDIDO`.
+
+---
+
+
 
 
 
