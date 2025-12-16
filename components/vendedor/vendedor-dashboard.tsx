@@ -9,6 +9,7 @@ import { AddProductDialog } from "./add-product-dialog"
 import { EditProductDialog } from "./edit-product-dialog"
 import { ProductDetailDialog } from "./product-detail-dialog"
 import { ReclamosVendedor } from "./reclamos-vendedor"
+import { ResenasVendedor } from "./resenas-vendedor"
 import { AppHeader } from "@/components/shared/app-header"
 import { getSession } from "@/components/auth/users"
 import { useProducts } from "@/components/products-context"
@@ -30,30 +31,40 @@ export function VendedorDashboard() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [activeTab, setActiveTab] = useState("productos")
   const [reclamosPendientes, setReclamosPendientes] = useState(0)
+  const [totalResenas, setTotalResenas] = useState(0)
   const { toast } = useToast()
 
-  // Cargar número de reclamos pendientes
+  // Cargar número de reclamos pendientes y reseñas
   useEffect(() => {
-    const loadReclamosPendientes = () => {
+    const loadStats = () => {
       try {
         const session = getSession()
         if (!session?.email) return
 
+        // Reclamos pendientes
         const allReclamos = JSON.parse(localStorage.getItem("marketplace_reclamos") || "[]")
         const misReclamos = allReclamos.filter((r: any) => 
           r.vendedorEmail === session.email && r.estado === "pendiente"
         )
         setReclamosPendientes(misReclamos.length)
+
+        // Total de reseñas
+        const allResenas = JSON.parse(localStorage.getItem("marketplace_resenas") || "[]")
+        const misResenas = allResenas.filter((resena: any) => {
+          const product = products.find((p: any) => p.id === resena.productoId)
+          return product !== undefined
+        })
+        setTotalResenas(misResenas.length)
       } catch (error) {
-        console.error("Error al cargar reclamos:", error)
+        console.error("Error al cargar estadísticas:", error)
       }
     }
 
-    loadReclamosPendientes()
+    loadStats()
     // Actualizar cada 30 segundos
-    const interval = setInterval(loadReclamosPendientes, 30000)
+    const interval = setInterval(loadStats, 30000)
     return () => clearInterval(interval)
-  }, [activeTab])
+  }, [activeTab, products])
 
   // Filtrar productos por categoría
   const filteredProducts = products.filter(product => 
@@ -203,7 +214,7 @@ export function VendedorDashboard() {
 
           {/* Tabs de navegación */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsList className="grid w-full grid-cols-3 max-w-2xl">
               <TabsTrigger value="productos">
                 Mis Productos
               </TabsTrigger>
@@ -212,6 +223,14 @@ export function VendedorDashboard() {
                 {reclamosPendientes > 0 && (
                   <span className="ml-2 px-2 py-0.5 rounded-full bg-red-500 text-white text-xs font-semibold">
                     {reclamosPendientes}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="resenas" className="relative">
+                Reseñas
+                {totalResenas > 0 && (
+                  <span className="ml-2 px-2 py-0.5 rounded-full bg-blue-500 text-white text-xs font-semibold">
+                    {totalResenas}
                   </span>
                 )}
               </TabsTrigger>
@@ -259,6 +278,10 @@ export function VendedorDashboard() {
 
             <TabsContent value="reclamos" className="mt-6">
               <ReclamosVendedor />
+            </TabsContent>
+
+            <TabsContent value="resenas" className="mt-6">
+              <ResenasVendedor />
             </TabsContent>
           </Tabs>
         </div>

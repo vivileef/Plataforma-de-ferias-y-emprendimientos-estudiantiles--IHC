@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShoppingCart, Menu, Search, AlertCircle, Package } from "lucide-react"
+import { ShoppingCart, Menu, Search, AlertCircle, Package, Star } from "lucide-react"
 import Link from "next/link"
 import { ProductGrid } from "./product-grid"
 import { CartSheet } from "./cart-sheet"
@@ -185,6 +185,20 @@ export function CompradorDashboard() {
                 })()}
               </div>
               <div className="flex gap-2 flex-wrap">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link href="/comprador/resenas">
+                      <Button variant="outline" className="gap-2">
+                        <Star className="h-4 w-4" />
+                        Reseñas
+                      </Button>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Escribir reseñas de productos</p>
+                  </TooltipContent>
+                </Tooltip>
+
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link href="/comprador/reclamos">
