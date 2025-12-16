@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShoppingCart, Menu, Search, AlertCircle, Package, Star } from "lucide-react"
+import { ShoppingCart, Menu, Search, AlertCircle, Package, Star, Calendar } from "lucide-react"
 import Link from "next/link"
 import { ProductGrid } from "./product-grid"
 import { CartSheet } from "./cart-sheet"
 import { ProductDetailDialog } from "./product-detail-dialog"
+import { FeriasComprador } from "./ferias-comprador"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { AppHeader } from "@/components/shared/app-header"
@@ -27,6 +28,7 @@ export function CompradorDashboard() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [showProductDetail, setShowProductDetail] = useState(false)
+  const [showFerias, setShowFerias] = useState(false)
   const { products } = useProducts()
   const { t } = useLanguage()
   const searchRef = useRef<HTMLInputElement | null>(null)
@@ -208,6 +210,22 @@ export function CompradorDashboard() {
               <div className="flex gap-2 flex-wrap">
                 <Tooltip>
                   <TooltipTrigger asChild>
+                    <Button 
+                      variant={showFerias ? "default" : "outline"} 
+                      className="gap-2"
+                      onClick={() => setShowFerias(!showFerias)}
+                    >
+                      <Calendar className="h-4 w-4" />
+                      Ferias
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Ver ferias y eventos especiales</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
                     <Link href="/comprador/resenas">
                       <Button variant="outline" className="gap-2">
                         <Star className="h-4 w-4" />
@@ -291,8 +309,12 @@ export function CompradorDashboard() {
               </CardContent>
             </Card>
 
-            {/* Products */}
-            <ProductGrid products={filteredProducts} onAddToCart={handleAddToCart} onViewDetails={handleViewDetails} />
+            {/* Ferias o Products */}
+            {showFerias ? (
+              <FeriasComprador />
+            ) : (
+              <ProductGrid products={filteredProducts} onAddToCart={handleAddToCart} onViewDetails={handleViewDetails} />
+            )}
           </div>
         </main>
       </div>

@@ -11,6 +11,7 @@ import { ProductDetailDialog } from "./product-detail-dialog"
 import { ReclamosVendedor } from "./reclamos-vendedor"
 import { ResenasVendedor } from "./resenas-vendedor"
 import { PromocionesVendedor } from "./promociones-vendedor"
+import { FeriasVendedor } from "./ferias-vendedor"
 import { AppHeader } from "@/components/shared/app-header"
 import { getSession } from "@/components/auth/users"
 import { useProducts } from "@/components/products-context"
@@ -34,6 +35,7 @@ export function VendedorDashboard() {
   const [reclamosPendientes, setReclamosPendientes] = useState(0)
   const [totalResenas, setTotalResenas] = useState(0)
   const [promocionesActivas, setPromocionesActivas] = useState(0)
+  const [feriasInscritas, setFeriasInscritas] = useState(0)
   const { toast } = useToast()
 
   // Cargar número de reclamos pendientes y reseñas
@@ -67,6 +69,13 @@ export function VendedorDashboard() {
         })
         setPromocionesActivas(misPromocionesActivas.length)
         setTotalResenas(misResenas.length)
+
+        // Ferias inscritas
+        const allFeriasVendedores = JSON.parse(localStorage.getItem("marketplace_ferias_vendedores") || "[]")
+        const misFeriasInscritas = allFeriasVendedores.filter((fv: any) => 
+          fv.vendedorEmail === session.email
+        )
+        setFeriasInscritas(misFeriasInscritas.length)
       } catch (error) {
         console.error("Error al cargar estadísticas:", error)
       }
@@ -226,7 +235,7 @@ export function VendedorDashboard() {
 
           {/* Tabs de navegación */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4 max-w-3xl">
+            <TabsList className="grid w-full grid-cols-5 max-w-4xl">
               <TabsTrigger value="productos">
                 Mis Productos
               </TabsTrigger>
@@ -251,6 +260,14 @@ export function VendedorDashboard() {
                 {promocionesActivas > 0 && (
                   <span className="ml-2 px-2 py-0.5 rounded-full bg-green-500 text-white text-xs font-semibold">
                     {promocionesActivas}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="ferias" className="relative">
+                Ferias
+                {feriasInscritas > 0 && (
+                  <span className="ml-2 px-2 py-0.5 rounded-full bg-purple-500 text-white text-xs font-semibold">
+                    {feriasInscritas}
                   </span>
                 )}
               </TabsTrigger>
@@ -306,6 +323,10 @@ export function VendedorDashboard() {
 
             <TabsContent value="promociones" className="mt-6">
               <PromocionesVendedor />
+            </TabsContent>
+
+            <TabsContent value="ferias" className="mt-6">
+              <FeriasVendedor />
             </TabsContent>
           </Tabs>
         </div>

@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Package } from "lucide-react"
+import { Users, Package, Calendar } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UsersTable } from "./users-table"
 import { ProductsTable } from "./products-table"
 import { ProductManagement } from "./product-management"
+import { FeriasManagement } from "./ferias-management"
 import { AppHeader } from "@/components/shared/app-header"
 import { getAllUsers, deleteUser, AppUser } from "@/components/auth/users"
 import { useProducts } from "@/components/products-context"
@@ -126,7 +127,7 @@ export function AdminDashboard() {
 
           {/* Management Tabs */}
           <Tabs defaultValue="users" className="space-y-4">
-            <TabsList className="grid w-full max-w-2xl grid-cols-3">
+            <TabsList className="grid w-full max-w-3xl grid-cols-4">
               <TabsTrigger value="users" className="gap-2">
                 <Users className="h-4 w-4" />
                 Usuarios
@@ -138,6 +139,10 @@ export function AdminDashboard() {
               <TabsTrigger value="management" className="gap-2">
                 <Package className="h-4 w-4" />
                 Gestión Avanzada
+              </TabsTrigger>
+              <TabsTrigger value="ferias" className="gap-2">
+                <Calendar className="h-4 w-4" />
+                Ferias
               </TabsTrigger>
             </TabsList>
 
@@ -171,6 +176,10 @@ export function AdminDashboard() {
 
             <TabsContent value="management">
               <ProductManagement />
+            </TabsContent>
+
+            <TabsContent value="ferias">
+              <FeriasManagement />
             </TabsContent>
           </Tabs>
         </div>
