@@ -274,7 +274,7 @@ export function FeriasVendedor() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Ferias y Eventos</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Ferias y Eventos</h2>
         <p className="text-muted-foreground">
           Participa en eventos especiales y aumenta tu visibilidad
         </p>

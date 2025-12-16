@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, Package, Calendar, AlertTriangle } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import { UsersTable } from "./users-table"
 import { ProductsTable } from "./products-table"
 import { ProductManagement } from "./product-management"
@@ -18,6 +20,7 @@ export function AdminDashboard() {
   const { products, deleteProduct } = useProducts()
   const { toast } = useToast()
   const [users, setUsers] = useState<AppUser[]>([])
+  const [activeSection, setActiveSection] = useState("users")
 
   // Load users from localStorage
   useEffect(() => {
@@ -126,32 +129,52 @@ export function AdminDashboard() {
             </Card>
           </div>
 
-          {/* Management Tabs */}
-          <Tabs defaultValue="users" className="space-y-4">
-            <TabsList className="grid w-full max-w-4xl grid-cols-5">
-              <TabsTrigger value="users" className="gap-2">
-                <Users className="h-4 w-4" />
-                Usuarios
-              </TabsTrigger>
-              <TabsTrigger value="products" className="gap-2">
-                <Package className="h-4 w-4" />
-                Productos
-              </TabsTrigger>
-              <TabsTrigger value="management" className="gap-2">
-                <Package className="h-4 w-4" />
-                Gestión Avanzada
-              </TabsTrigger>
-              <TabsTrigger value="ferias" className="gap-2">
-                <Calendar className="h-4 w-4" />
-                Ferias
-              </TabsTrigger>
-              <TabsTrigger value="sanciones" className="gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                Sanciones
-              </TabsTrigger>
-            </TabsList>
+          {/* Selector de Sección */}
+          <div className="flex items-center gap-4">
+            <Label htmlFor="section-select" className="text-base font-medium">
+              Sección:
+            </Label>
+            <Select value={activeSection} onValueChange={setActiveSection}>
+              <SelectTrigger id="section-select" className="w-[280px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="users">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Usuarios
+                  </div>
+                </SelectItem>
+                <SelectItem value="products">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4" />
+                    Publicaciones
+                  </div>
+                </SelectItem>
+                <SelectItem value="management">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4" />
+                    Productos
+                  </div>
+                </SelectItem>
+                <SelectItem value="ferias">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Ferias
+                  </div>
+                </SelectItem>
+                <SelectItem value="sanciones">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    Sanciones
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <TabsContent value="users">
+          <div className="space-y-4">
+            {activeSection === "users" && (
               <Card>
                 <CardHeader>
                   <CardTitle>Gestión de Usuarios</CardTitle>
@@ -161,9 +184,9 @@ export function AdminDashboard() {
                   <UsersTable users={transformedUsers} onDelete={handleDeleteUser} onToggleStatus={handleToggleUserStatus} />
                 </CardContent>
               </Card>
-            </TabsContent>
+            )}
 
-            <TabsContent value="products">
+            {activeSection === "products" && (
               <Card>
                 <CardHeader>
                   <CardTitle>Gestión de Publicaciones</CardTitle>
@@ -177,20 +200,44 @@ export function AdminDashboard() {
                   />
                 </CardContent>
               </Card>
-            </TabsContent>
+            )}
 
-            <TabsContent value="management">
-              <ProductManagement />
-            </TabsContent>
+            {activeSection === "management" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Gestión de Productos</CardTitle>
+                  <CardDescription>Administra el ciclo de vida y estados de los productos</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ProductManagement />
+                </CardContent>
+              </Card>
+            )}
 
-            <TabsContent value="ferias">
-              <FeriasManagement />
-            </TabsContent>
+            {activeSection === "ferias" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Gestión de Ferias</CardTitle>
+                  <CardDescription>Administra ferias y eventos especiales de la plataforma</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FeriasManagement />
+                </CardContent>
+              </Card>
+            )}
 
-            <TabsContent value="sanciones">
-              <SancionesVendedor />
-            </TabsContent>
-          </Tabs>
+            {activeSection === "sanciones" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sanciones y Eliminaciones</CardTitle>
+                  <CardDescription>Gestiona sanciones y eliminaciones de vendedores</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SancionesVendedor />
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </main>
     </div>

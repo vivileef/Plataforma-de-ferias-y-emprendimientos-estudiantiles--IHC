@@ -19,7 +19,9 @@ import { useLanguage } from "@/components/language-provider"
 import { useToast } from "@/hooks/use-toast"
 import { CategorySidebar } from "@/components/shared/category-sidebar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, ChevronLeft, ChevronRight, Filter } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import { Menu, ChevronLeft, ChevronRight, Filter, Package, Star, Gift, Calendar } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -269,66 +271,100 @@ export function VendedorDashboard() {
         {/* Main Content */}
         <main className="flex-1 p-4 md:p-8">
         <div className="max-w-6xl mx-auto space-y-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col gap-4">
             <div>
               <h1 className="text-3xl font-bold text-foreground">{useLanguage().t("vendorDashboardTitle")}</h1>
               <p className="text-muted-foreground mt-1">{useLanguage().t("vendorDashboardSubtitle")}</p>
               {displayName && <p className="mt-2 text-sm">Hola <span className="font-medium">{displayName}</span>, ¡suerte en las ventas!</p>}
             </div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={() => setShowAddProduct(true)} className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  {useLanguage().t("addProductButton")}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Publicar nuevo producto (Atajo: N)</p>
-              </TooltipContent>
-            </Tooltip>
+            
+            {/* Menú desplegable de secciones */}
+            <div className="flex items-center gap-2">
+              <Label htmlFor="vendor-section-select" className="text-sm font-medium">Sección:</Label>
+              <Select value={activeTab} onValueChange={setActiveTab}>
+                <SelectTrigger id="vendor-section-select" className="w-[280px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="productos">
+                    <div className="flex items-center gap-2">
+                      <Package className="h-4 w-4" />
+                      <span>Mis Productos</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="reclamos">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4" />
+                      <span>Reclamos</span>
+                      {reclamosPendientes > 0 && (
+                        <span className="ml-auto px-2 py-0.5 rounded-full bg-red-500 text-white text-xs font-semibold">
+                          {reclamosPendientes}
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="resenas">
+                    <div className="flex items-center gap-2">
+                      <Star className="h-4 w-4" />
+                      <span>Reseñas</span>
+                      {totalResenas > 0 && (
+                        <span className="ml-auto px-2 py-0.5 rounded-full bg-blue-500 text-white text-xs font-semibold">
+                          {totalResenas}
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="promociones">
+                    <div className="flex items-center gap-2">
+                      <Gift className="h-4 w-4" />
+                      <span>Promociones</span>
+                      {promocionesActivas > 0 && (
+                        <span className="ml-auto px-2 py-0.5 rounded-full bg-green-500 text-white text-xs font-semibold">
+                          {promocionesActivas}
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="ferias">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>Ferias</span>
+                      {feriasInscritas > 0 && (
+                        <span className="ml-auto px-2 py-0.5 rounded-full bg-purple-500 text-white text-xs font-semibold">
+                          {feriasInscritas}
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Tabs de navegación */}
+          {/* Contenido de las secciones */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-5 max-w-4xl">
-              <TabsTrigger value="productos">
-                Mis Productos
-              </TabsTrigger>
-              <TabsTrigger value="reclamos" className="relative">
-                Reclamos
-                {reclamosPendientes > 0 && (
-                  <span className="ml-2 px-2 py-0.5 rounded-full bg-red-500 text-white text-xs font-semibold">
-                    {reclamosPendientes}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="resenas" className="relative">
-                Reseñas
-                {totalResenas > 0 && (
-                  <span className="ml-2 px-2 py-0.5 rounded-full bg-blue-500 text-white text-xs font-semibold">
-                    {totalResenas}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="promociones" className="relative">
-                Promociones
-                {promocionesActivas > 0 && (
-                  <span className="ml-2 px-2 py-0.5 rounded-full bg-green-500 text-white text-xs font-semibold">
-                    {promocionesActivas}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="ferias" className="relative">
-                Ferias
-                {feriasInscritas > 0 && (
-                  <span className="ml-2 px-2 py-0.5 rounded-full bg-purple-500 text-white text-xs font-semibold">
-                    {feriasInscritas}
-                  </span>
-                )}
-              </TabsTrigger>
-            </TabsList>
-
             <TabsContent value="productos" className="space-y-6 mt-6">
+              {/* Header con botón */}
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-2xl font-bold tracking-tight">Mis Productos</h2>
+                  <p className="text-muted-foreground mt-1">
+                    Gestiona tu catálogo de productos artesanales
+                  </p>
+                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={() => setShowAddProduct(true)} size="lg">
+                      <Plus className="h-5 w-5 mr-2" />
+                      {useLanguage().t("addProductButton")}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Publicar nuevo producto (Atajo: N)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+
               <div className="grid sm:grid-cols-3 gap-4">
                 <Card>
                   <CardHeader className="pb-3">

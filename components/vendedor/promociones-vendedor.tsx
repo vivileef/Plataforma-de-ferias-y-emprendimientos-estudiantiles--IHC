@@ -275,7 +275,7 @@ export function PromocionesVendedor() {
       {/* Header con estadísticas */}
       <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Promociones y Cupones</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Promociones y Cupones</h2>
           <p className="text-muted-foreground mt-1">
             Crea y gestiona promociones para tus productos
           </p>

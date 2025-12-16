@@ -11,6 +11,8 @@ import { ProductDetailDialog } from "./product-detail-dialog"
 import { FeriasComprador } from "./ferias-comprador"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import { AppHeader } from "@/components/shared/app-header"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { getSession, getAllUsers } from "@/components/auth/users"
@@ -30,6 +32,7 @@ export function CompradorDashboard() {
   const [showProductDetail, setShowProductDetail] = useState(false)
   const [showFerias, setShowFerias] = useState(false)
   const [showSidebar, setShowSidebar] = useState(true)
+  const [activeSection, setActiveSection] = useState("productos")
   const [sidebarFilters, setSidebarFilters] = useState<any>({
     searchTerm: "",
     priceRange: [0, 1000],
@@ -192,6 +195,19 @@ export function CompradorDashboard() {
     return () => window.removeEventListener("keydown", onKey)
   }, [showProductDetail, showCart, searchQuery])
 
+  // Redireccionar cuando se seleccionan secciones que tienen páginas dedicadas
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (activeSection === "resenas") {
+        window.location.href = "/comprador/resenas"
+      } else if (activeSection === "reclamos") {
+        window.location.href = "/comprador/reclamos"
+      } else if (activeSection === "cancelar") {
+        window.location.href = "/comprador/cancelacion-pedidos"
+      }
+    }
+  }, [activeSection])
+
   return (
     <TooltipProvider>
     <div className="min-h-screen flex flex-col">
@@ -268,64 +284,47 @@ export function CompradorDashboard() {
                   return displayName ? <p className="mt-2 text-sm">Hola <span className="font-medium">{displayName}</span>, ¡suerte en las compras!</p> : null
                 })()}
               </div>
-              <div className="flex gap-2 flex-wrap">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant={showFerias ? "default" : "outline"} 
-                      className="gap-2"
-                      onClick={() => setShowFerias(!showFerias)}
-                    >
-                      <Calendar className="h-4 w-4" />
-                      Ferias
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Ver ferias y eventos especiales</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link href="/comprador/resenas">
-                      <Button variant="outline" className="gap-2">
-                        <Star className="h-4 w-4" />
-                        Reseñas
-                      </Button>
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Escribir reseñas de productos</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link href="/comprador/reclamos">
-                      <Button variant="outline" className="gap-2">
-                        <AlertCircle className="h-4 w-4" />
-                        Reclamos
-                      </Button>
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Reportar problemas con pedidos</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link href="/comprador/cancelacion-pedidos">
-                      <Button variant="outline" className="gap-2">
-                        <Package className="h-4 w-4" />
-                        Cancelar/Modificar
-                      </Button>
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Cancelar o modificar pedidos</p>
-                  </TooltipContent>
-                </Tooltip>
+              <div className="flex gap-4 items-center flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="section-select" className="text-sm font-medium">Sección:</Label>
+                  <Select value={activeSection} onValueChange={setActiveSection}>
+                    <SelectTrigger id="section-select" className="w-[240px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="productos">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4" />
+                          <span>Productos</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="ferias">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          <span>Ferias</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="resenas">
+                        <div className="flex items-center gap-2">
+                          <Star className="h-4 w-4" />
+                          <span>Reseñas</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="reclamos">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4" />
+                          <span>Reclamos</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="cancelar">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4" />
+                          <span>Cancelar/Modificar</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -370,11 +369,31 @@ export function CompradorDashboard() {
               </CardContent>
             </Card>
 
-            {/* Ferias o Products */}
-            {showFerias ? (
-              <FeriasComprador />
-            ) : (
+            {/* Contenido según sección activa */}
+            {activeSection === "productos" && (
               <ProductGrid products={filteredProducts} onAddToCart={handleAddToCart} onViewDetails={handleViewDetails} />
+            )}
+
+            {activeSection === "ferias" && (
+              <FeriasComprador />
+            )}
+
+            {activeSection === "resenas" && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Redirigiendo a reseñas...</p>
+              </div>
+            )}
+
+            {activeSection === "reclamos" && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Redirigiendo a reclamos...</p>
+              </div>
+            )}
+
+            {activeSection === "cancelar" && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Redirigiendo a cancelación/modificación de pedidos...</p>
+              </div>
             )}
           </div>
         </main>

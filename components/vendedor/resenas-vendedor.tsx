@@ -97,6 +97,14 @@ export function ResenasVendedor() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Reseñas de Productos</h2>
+        <p className="text-muted-foreground mt-1">
+          Consulta las opiniones y calificaciones de tus clientes
+        </p>
+      </div>
+
       {/* Estadísticas Generales */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>

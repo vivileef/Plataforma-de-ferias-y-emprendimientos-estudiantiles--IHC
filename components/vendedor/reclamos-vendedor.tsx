@@ -212,6 +212,14 @@ export function ReclamosVendedor() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Reclamos y Solicitudes</h2>
+        <p className="text-muted-foreground mt-1">
+          Gestiona reclamos de clientes y solicitudes de cancelación/modificación
+        </p>
+      </div>
+
       {/* Tabs Principal */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
         <TabsList className="grid w-full grid-cols-2">

@@ -215,14 +215,6 @@ export function ProductManagement() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Gestión de Productos</h2>
-        <p className="text-muted-foreground mt-1">
-          Administra el catálogo de productos del marketplace
-        </p>
-      </div>
-
       {/* Estadísticas */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

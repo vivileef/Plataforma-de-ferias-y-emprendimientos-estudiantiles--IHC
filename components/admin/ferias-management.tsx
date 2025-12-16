@@ -431,16 +431,10 @@ export function FeriasManagement() {
 
   return (
     <div className="space-y-6">
-      {/* Header con estadísticas */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Gestión de Ferias</h2>
-          <p className="text-muted-foreground">
-            Administra eventos especiales y campañas coordinadas
-          </p>
-        </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="mr-2 h-4 w-4" />
+      {/* Header con botón */}
+      <div className="flex items-center justify-end">
+        <Button onClick={() => setShowCreateDialog(true)} size="lg">
+          <Plus className="h-5 w-5 mr-2" />
           Crear Nueva Feria
         </Button>
       </div>

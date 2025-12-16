@@ -86,7 +86,7 @@ export function ProductGrid({ products, onAddToCart, onViewDetails }: ProductGri
                   <TooltipTrigger asChild>
                 <Button variant="secondary" size="sm" className="gap-2" onClick={() => onViewDetails(product)}>
                   <Eye className="h-4 w-4" />
-                  {t("btnViewDetails") || "Ver Detalles"}
+                  Detalles
                 </Button>
                   </TooltipTrigger>
                   <TooltipContent>
