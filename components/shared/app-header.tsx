@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Store, LogOut } from "lucide-react"
+import { Store, LogOut, Menu, User } from "lucide-react"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
@@ -10,6 +10,14 @@ import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { usePathname } from "next/navigation"
 import { Input } from "@/components/ui/input"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface AppHeaderProps {
   userName?: string
@@ -58,51 +66,79 @@ export function AppHeader({ userName, userRole, showLogout = true }: AppHeaderPr
         </Link>
 
         <div className="flex items-center gap-4">
-          <Input type="text" placeholder="Buscar..." className="hidden sm:block w-64" />
-          <span className="text-sm text-muted-foreground hidden sm:block">
+          <Input type="text" placeholder="Buscar..." className="hidden md:block w-64" />
+          <span className="text-sm text-muted-foreground hidden lg:block">
             Formulario actual: {getCurrentForm()}
           </span>
           {sessionName && (
-            <div className="hidden sm:block text-sm mr-2">
+            <div className="hidden md:block text-sm mr-2">
               Hola, <span className="font-medium">{sessionName}</span>
             </div>
           )}
-          {/* Profile link (goes to role-specific profile page) */}
-          {sessionName && sessionRole && (
-            <Link
-              href={
-                sessionRole === "vendedor"
-                  ? "/vendedor/perfil"
-                  : sessionRole === "comprador"
-                  ? "/comprador/perfil"
-                  : "/admin/dashboard"
-              }
-              aria-label={`Ir al perfil de ${sessionName}`}
-              className="inline-flex items-center gap-2 rounded-md p-2 hover:bg-muted/40 transition-colors"
-            >
-              <Avatar className="h-8 w-8 sm:h-7 sm:w-7">
-                <AvatarFallback>
-                  {sessionName
-                    .split(" ")
-                    .map((n) => (n && n[0] ? n[0] : ""))
-                    .slice(0, 2)
-                    .join("")
-                    .toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="hidden sm:inline text-sm">Ver/Editar Perfil</span>
-            </Link>
-          )}
-          <LanguageToggle />
-          <ThemeToggle />
-          {showLogout && (
-            <button onClick={handleLogout} className="inline-flex items-center">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Cerrar Sesión</span>
+
+          {/* Menú hamburguesa con todas las opciones */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Menu className="h-5 w-5" />
               </Button>
-            </button>
-          )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {sessionName && (
+                <>
+                  <DropdownMenuLabel>
+                    {sessionName}
+                    {sessionRole && <span className="block text-xs text-muted-foreground font-normal">{sessionRole}</span>}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              
+              {sessionName && sessionRole && (
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={
+                      sessionRole === "vendedor"
+                        ? "/vendedor/perfil"
+                        : sessionRole === "comprador"
+                        ? "/comprador/perfil"
+                        : "/admin/dashboard"
+                    }
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <User className="h-4 w-4" />
+                    Ver/Editar Perfil
+                  </Link>
+                </DropdownMenuItem>
+              )}
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem asChild>
+                <div className="flex items-center justify-between cursor-default">
+                  <span>Idioma</span>
+                  <LanguageToggle />
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem asChild>
+                <div className="flex items-center justify-between cursor-default">
+                  <span>Tema</span>
+                  <ThemeToggle />
+                </div>
+              </DropdownMenuItem>
+
+              {showLogout && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 cursor-pointer">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Cerrar Sesión
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

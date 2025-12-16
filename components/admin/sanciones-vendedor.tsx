@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
+import { EliminacionVendedor } from "./eliminacion-vendedor"
 import {
   Select,
   SelectContent,
@@ -474,10 +475,18 @@ export function SancionesVendedor() {
           <TabsTrigger value="sancionados">
             Sancionados ({stats.vendedoresSancionados})
           </TabsTrigger>
+          <TabsTrigger value="eliminaciones">
+            Eliminaciones
+          </TabsTrigger>
           <TabsTrigger value="historial">
             Historial Completo ({sanciones.length})
           </TabsTrigger>
         </TabsList>
+
+        {/* Tab de Eliminaciones */}
+        <TabsContent value="eliminaciones">
+          <EliminacionVendedor />
+        </TabsContent>
 
         {/* Todos los vendedores */}
         <TabsContent value="vendedores" className="space-y-4">
@@ -485,22 +494,36 @@ export function SancionesVendedor() {
             {filteredVendedores.map((vendedor) => {
               const sancionActiva = getSancionActiva(vendedor.email)
               const historial = getSancionesPorVendedor(vendedor.email)
+              const estaEliminado = vendedor.eliminado
               
               return (
-                <Card key={vendedor.email} className={sancionActiva ? "border-red-500" : ""}>
+                <Card key={vendedor.email} className={sancionActiva ? "border-red-500" : estaEliminado ? "border-gray-500 opacity-60" : ""}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
                         <CardTitle className="text-lg">{vendedor.name || "Sin nombre"}</CardTitle>
                         <p className="text-sm text-muted-foreground">{vendedor.email}</p>
+                        {estaEliminado && (
+                          <Badge variant="outline" className="bg-gray-100">
+                            Cuenta Eliminada
+                          </Badge>
+                        )}
                       </div>
-                      {sancionActiva && (
+                      {sancionActiva && !estaEliminado && (
                         <AlertTriangle className="h-5 w-5 text-red-500" />
                       )}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {sancionActiva && (
+                    {estaEliminado && (
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-sm text-gray-700">
+                          Este vendedor ha sido eliminado del sistema. Ya no puede acceder ni operar.
+                        </p>
+                      </div>
+                    )}
+
+                    {sancionActiva && !estaEliminado && (
                       <div className="space-y-2 p-3 bg-red-50 rounded-lg border border-red-200">
                         <div className="flex items-center justify-between">
                           {getTipoBadge(sancionActiva.tipo)}
@@ -533,7 +556,7 @@ export function SancionesVendedor() {
                         Historial
                       </Button>
                       
-                      {sancionActiva ? (
+                      {sancionActiva && !estaEliminado ? (
                         <Button
                           variant="outline"
                           size="sm"
@@ -543,7 +566,7 @@ export function SancionesVendedor() {
                           <Undo2 className="mr-2 h-4 w-4" />
                           Revertir
                         </Button>
-                      ) : (
+                      ) : !estaEliminado ? (
                         <Button
                           size="sm"
                           className="flex-1"
@@ -552,7 +575,7 @@ export function SancionesVendedor() {
                           <Shield className="mr-2 h-4 w-4" />
                           Sancionar
                         </Button>
-                      )}
+                      ) : null}
                     </div>
                   </CardContent>
                 </Card>

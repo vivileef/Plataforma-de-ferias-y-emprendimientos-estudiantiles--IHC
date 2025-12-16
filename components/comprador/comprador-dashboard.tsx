@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShoppingCart, Menu, Search, AlertCircle, Package, Star, Calendar } from "lucide-react"
+import { ShoppingCart, Menu, Search, AlertCircle, Package, Star, Calendar, ChevronLeft, ChevronRight, Filter } from "lucide-react"
 import Link from "next/link"
 import { ProductGrid } from "./product-grid"
 import { CartSheet } from "./cart-sheet"
@@ -13,7 +13,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { AppHeader } from "@/components/shared/app-header"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { getSession } from "@/components/auth/users"
+import { getSession, getAllUsers } from "@/components/auth/users"
 import { CategorySidebar } from "@/components/shared/category-sidebar"
 import { useProducts } from "@/components/products-context"
 import { useLanguage } from "@/components/language-provider"
@@ -29,6 +29,13 @@ export function CompradorDashboard() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [showProductDetail, setShowProductDetail] = useState(false)
   const [showFerias, setShowFerias] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(true)
+  const [sidebarFilters, setSidebarFilters] = useState<any>({
+    searchTerm: "",
+    priceRange: [0, 1000],
+    inStock: false,
+    hasDiscount: false
+  })
   const { products } = useProducts()
   const { t } = useLanguage()
   const searchRef = useRef<HTMLInputElement | null>(null)
@@ -74,6 +81,10 @@ export function CompradorDashboard() {
     setShowProductDetail(true)
   }
 
+  const handleFilterChange = (filters: any) => {
+    setSidebarFilters(filters)
+  }
+
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
@@ -95,11 +106,37 @@ export function CompradorDashboard() {
     const estado = getProductStatus(product.id)
     if (estado !== "activo") return false
 
+    // Verificar si el vendedor está eliminado
+    if (product.seller) {
+      const users = getAllUsers()
+      const vendedor = users.find(u => u.email === product.seller)
+      if (vendedor?.eliminado) return false
+    }
+
+    // Búsqueda combinada: desde input principal o desde filtro del sidebar
     const q = searchQuery.toLowerCase()
-    const matchesSearch =
-      product.name.toLowerCase().includes(q) || product.category.toLowerCase().includes(q) || product.description.toLowerCase().includes(q)
+    const sidebarSearchQ = sidebarFilters.searchTerm?.toLowerCase() || ""
+    const matchesSearch = 
+      product.name.toLowerCase().includes(q) || 
+      product.category.toLowerCase().includes(q) || 
+      product.description.toLowerCase().includes(q) ||
+      product.name.toLowerCase().includes(sidebarSearchQ) ||
+      product.description.toLowerCase().includes(sidebarSearchQ)
+    
+    // Filtro de categoría
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
-    return matchesSearch && matchesCategory
+    
+    // Filtro de rango de precio
+    const price = product.precioDescuento || product.price
+    const matchesPrice = price >= sidebarFilters.priceRange[0] && price <= sidebarFilters.priceRange[1]
+    
+    // Filtro de stock
+    const matchesStock = !sidebarFilters.inStock || (product.stock && product.stock > 0)
+    
+    // Filtro de descuento
+    const matchesDiscount = !sidebarFilters.hasDiscount || (product.descuento && product.descuento > 0)
+    
+    return matchesSearch && matchesCategory && matchesPrice && matchesStock && matchesDiscount
   })
 
   // Keyboard shortcuts: '/' or 'Ctrl+F' focuses search, 'c' toggles cart, 'Esc' clears search/closes dialogs, numbers 1-6 filter by category
@@ -174,22 +211,46 @@ export function CompradorDashboard() {
                   size="icon"
                   className="md:hidden fixed bottom-4 left-4 z-40 h-12 w-12 rounded-full shadow-lg"
                 >
-                  <Menu className="h-6 w-6" />
+                  <Filter className="h-6 w-6" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="right">
-                <p>Abrir menú de categorías</p>
+                <p>Categorías y filtros de búsqueda</p>
               </TooltipContent>
             </Tooltip>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64">
-            <CategorySidebar selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+            <CategorySidebar 
+              selectedCategory={selectedCategory} 
+              onSelectCategory={setSelectedCategory}
+              onFilterChange={handleFilterChange}
+            />
           </SheetContent>
         </Sheet>
 
-        <aside className="hidden md:block w-64 border-r bg-card">
+        {/* Botón toggle para sidebar (solo desktop) */}
+        <div className="hidden md:block">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="fixed left-4 top-24 z-40 shadow-lg"
+          >
+            {showSidebar ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </div>
+
+        <aside 
+          className={`hidden md:block w-64 border-r bg-card transition-all duration-300 ease-in-out ${
+            showSidebar ? 'translate-x-0' : '-translate-x-full absolute'
+          }`}
+        >
           <div className="sticky top-16">
-            <CategorySidebar selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+            <CategorySidebar 
+              selectedCategory={selectedCategory} 
+              onSelectCategory={setSelectedCategory}
+              onFilterChange={handleFilterChange}
+            />
           </div>
         </aside>
 

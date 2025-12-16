@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { useProducts } from "@/components/products-context"
 import { useToast } from "@/hooks/use-toast"
+import { getAllUsers } from "@/components/auth/users"
 import { 
   Calendar,
   Tag,
@@ -98,11 +99,18 @@ export function FeriasComprador() {
     }
 
     const vendedores: FeriaVendedor[] = JSON.parse(vendedoresData)
+    const users = getAllUsers()
     
-    // Obtener vendedores aprobados de esta feria
-    const vendedoresAprobados = vendedores.filter(
-      v => v.feriaId === feria.id && v.estado === "aprobado"
-    )
+    // Obtener vendedores aprobados de esta feria que NO estén eliminados
+    const vendedoresAprobados = vendedores.filter(v => {
+      if (v.feriaId !== feria.id || v.estado !== "aprobado") return false
+      
+      // Verificar si el vendedor está eliminado
+      const vendedor = users.find(u => u.email === v.vendedorEmail)
+      if (vendedor?.eliminado) return false
+      
+      return true
+    })
 
     // Recopilar todos los IDs de productos
     const productosIds = vendedoresAprobados.flatMap(v => v.productosIds)

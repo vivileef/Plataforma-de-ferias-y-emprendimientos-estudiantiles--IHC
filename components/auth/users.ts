@@ -6,6 +6,7 @@ export type AppUser = {
   role: "vendedor" | "comprador" | "admin"
   bloqueado?: boolean
   motivoBloqueo?: string
+  eliminado?: boolean
 }
 
 const USERS_KEY = "marketplace_users_v1"
@@ -56,6 +57,11 @@ export function validateCredentials(email: string, password: string, userType: A
   const found = users.find((u) => u.email.toLowerCase() === email.toLowerCase())
   if (!found) return { ok: false, error: "Credenciales inválidas" }
   if (found.password !== password) return { ok: false, error: "Credenciales inválidas" }
+  
+  // Verificar si está eliminado
+  if (found.eliminado && found.role === "vendedor") {
+    return { ok: false, error: "Cuenta eliminada. Contacta al administrador si consideras que es un error." }
+  }
   
   // Verificar si está bloqueado
   if (found.bloqueado && found.role === "vendedor") {

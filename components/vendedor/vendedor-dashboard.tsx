@@ -19,7 +19,7 @@ import { useLanguage } from "@/components/language-provider"
 import { useToast } from "@/hooks/use-toast"
 import { CategorySidebar } from "@/components/shared/category-sidebar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu } from "lucide-react"
+import { Menu, ChevronLeft, ChevronRight, Filter } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -36,7 +36,18 @@ export function VendedorDashboard() {
   const [totalResenas, setTotalResenas] = useState(0)
   const [promocionesActivas, setPromocionesActivas] = useState(0)
   const [feriasInscritas, setFeriasInscritas] = useState(0)
+  const [showSidebar, setShowSidebar] = useState(true)
+  const [sidebarFilters, setSidebarFilters] = useState<any>({
+    searchTerm: "",
+    priceRange: [0, 1000],
+    inStock: false,
+    hasDiscount: false
+  })
   const { toast } = useToast()
+
+  const handleFilterChange = (filters: any) => {
+    setSidebarFilters(filters)
+  }
 
   // Cargar número de reclamos pendientes y reseñas
   useEffect(() => {
@@ -87,10 +98,30 @@ export function VendedorDashboard() {
     return () => clearInterval(interval)
   }, [activeTab, products])
 
-  // Filtrar productos por categoría
-  const filteredProducts = products.filter(product => 
-    selectedCategory === "all" || product.category === selectedCategory
-  )
+  // Filtrar productos por categoría y filtros del sidebar
+  const filteredProducts = products.filter(product => {
+    // Filtro de categoría
+    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+    
+    // Búsqueda por nombre desde filtro del sidebar
+    const sidebarSearchQ = sidebarFilters.searchTerm?.toLowerCase() || ""
+    const matchesSearch = 
+      !sidebarSearchQ ||
+      product.name.toLowerCase().includes(sidebarSearchQ) ||
+      product.description?.toLowerCase().includes(sidebarSearchQ)
+    
+    // Filtro de rango de precio
+    const price = product.precioDescuento || product.price
+    const matchesPrice = price >= sidebarFilters.priceRange[0] && price <= sidebarFilters.priceRange[1]
+    
+    // Filtro de stock
+    const matchesStock = !sidebarFilters.inStock || (product.stock && product.stock > 0)
+    
+    // Filtro de descuento
+    const matchesDiscount = !sidebarFilters.hasDiscount || (product.descuento && product.descuento > 0)
+    
+    return matchesCategory && matchesSearch && matchesPrice && matchesStock && matchesDiscount
+  })
 
   const handleAddProduct = (product: any) => {
     addProduct({ ...product, seller: "(Vendedor)" })
@@ -191,23 +222,47 @@ export function VendedorDashboard() {
               size="icon"
               className="md:hidden fixed bottom-4 left-4 z-40 h-12 w-12 rounded-full shadow-lg"
             >
-              <Menu className="h-6 w-6" />
+              <Filter className="h-6 w-6" />
             </Button>
               </TooltipTrigger>
               <TooltipContent side="right">
-                <p>Abrir menú de categorías</p>
+                <p>Categorías y filtros de búsqueda</p>
               </TooltipContent>
             </Tooltip>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64">
-            <CategorySidebar selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+            <CategorySidebar 
+              selectedCategory={selectedCategory} 
+              onSelectCategory={setSelectedCategory}
+              onFilterChange={handleFilterChange}
+            />
           </SheetContent>
         </Sheet>
 
-        {/* Sidebar desktop */}
-        <aside className="hidden md:block w-64 border-r bg-card">
+        {/* Botón toggle para sidebar (solo desktop) */}
+        <div className="hidden md:block">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="fixed left-4 top-24 z-40 shadow-lg"
+          >
+            {showSidebar ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </div>
+
+        {/* Sidebar desktop colapsable */}
+        <aside 
+          className={`hidden md:block w-64 border-r bg-card transition-all duration-300 ease-in-out ${
+            showSidebar ? 'translate-x-0' : '-translate-x-full absolute'
+          }`}
+        >
           <div className="sticky top-16">
-            <CategorySidebar selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+            <CategorySidebar 
+              selectedCategory={selectedCategory} 
+              onSelectCategory={setSelectedCategory}
+              onFilterChange={handleFilterChange}
+            />
           </div>
         </aside>
 
