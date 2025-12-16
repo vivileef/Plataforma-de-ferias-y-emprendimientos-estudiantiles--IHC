@@ -6,6 +6,7 @@ import { Users, Package } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UsersTable } from "./users-table"
 import { ProductsTable } from "./products-table"
+import { ProductManagement } from "./product-management"
 import { AppHeader } from "@/components/shared/app-header"
 import { getAllUsers, deleteUser, AppUser } from "@/components/auth/users"
 import { useProducts } from "@/components/products-context"
@@ -125,14 +126,18 @@ export function AdminDashboard() {
 
           {/* Management Tabs */}
           <Tabs defaultValue="users" className="space-y-4">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsList className="grid w-full max-w-2xl grid-cols-3">
               <TabsTrigger value="users" className="gap-2">
                 <Users className="h-4 w-4" />
                 Usuarios
               </TabsTrigger>
               <TabsTrigger value="products" className="gap-2">
                 <Package className="h-4 w-4" />
-                Publicaciones
+                Productos
+              </TabsTrigger>
+              <TabsTrigger value="management" className="gap-2">
+                <Package className="h-4 w-4" />
+                Gestión Avanzada
               </TabsTrigger>
             </TabsList>
 
@@ -162,6 +167,10 @@ export function AdminDashboard() {
                   />
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="management">
+              <ProductManagement />
             </TabsContent>
           </Tabs>
         </div>

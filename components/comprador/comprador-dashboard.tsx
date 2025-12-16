@@ -75,7 +75,24 @@ export function CompradorDashboard() {
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
+  // Filtrar productos activos (ocultar inactivos y eliminados)
+  const getProductStatus = (productId: string) => {
+    const statusData = localStorage.getItem("marketplace_products_status")
+    if (!statusData) return "activo"
+    
+    const statusMap: Record<string, any[]> = JSON.parse(statusData)
+    const productStatus = statusMap[productId]
+    
+    if (!productStatus || productStatus.length === 0) return "activo"
+    
+    return productStatus[productStatus.length - 1].estado
+  }
+
   const filteredProducts = products.filter((product) => {
+    // Filtrar solo productos activos
+    const estado = getProductStatus(product.id)
+    if (estado !== "activo") return false
+
     const q = searchQuery.toLowerCase()
     const matchesSearch =
       product.name.toLowerCase().includes(q) || product.category.toLowerCase().includes(q) || product.description.toLowerCase().includes(q)
