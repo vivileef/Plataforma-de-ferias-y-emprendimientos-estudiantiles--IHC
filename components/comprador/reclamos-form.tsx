@@ -467,6 +467,7 @@ export function ReclamosForm() {
                     email: "",
                     telefono: "",
                     archivos: [],
+                    vendedorEmail: "",
                   })
                 }}
               >

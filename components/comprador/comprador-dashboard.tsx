@@ -63,6 +63,10 @@ export function CompradorDashboard() {
     }
   }
 
+  const handleClearCart = () => {
+    setCart([])
+  }
+
   const handleViewDetails = (product: any) => {
     setSelectedProduct(product)
     setShowProductDetail(true)
@@ -282,6 +286,7 @@ export function CompradorDashboard() {
         cart={cart}
         onRemove={handleRemoveFromCart}
         onUpdateQuantity={handleUpdateQuantity}
+        onClearCart={handleClearCart}
         total={cartTotal}
       />
 

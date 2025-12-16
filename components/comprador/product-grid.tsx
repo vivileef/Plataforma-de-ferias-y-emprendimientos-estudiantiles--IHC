@@ -19,6 +19,8 @@ interface Product {
   category: string
   image: string
   description: string
+  descuento?: number
+  precioDescuento?: number
 }
 
 interface ProductGridProps {
@@ -74,6 +76,11 @@ export function ProductGrid({ products, onAddToCart, onViewDetails }: ProductGri
           <CardHeader className="p-0">
               <div className="relative h-48 w-full bg-muted">
               <Image src={product.image || "/placeholder.svg"} alt={product.name} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
+              {product.descuento && product.descuento > 0 && (
+                <div className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-full font-bold text-sm shadow-lg">
+                  -{product.descuento}%
+                </div>
+              )}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -112,7 +119,14 @@ export function ProductGrid({ products, onAddToCart, onViewDetails }: ProductGri
             <h3 className="font-semibold text-lg text-foreground mb-1 line-clamp-1">{product.name}</h3>
             <p className="text-sm text-muted-foreground mb-2">Por {product.seller}</p>
             <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{product.description}</p>
-            <p className="text-2xl font-bold text-primary">€{product.price.toFixed(2)}</p>
+            {product.descuento && product.descuento > 0 ? (
+              <div className="flex items-center gap-2">
+                <p className="text-lg text-muted-foreground line-through">€{product.price.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-green-600">€{product.precioDescuento?.toFixed(2)}</p>
+              </div>
+            ) : (
+              <p className="text-2xl font-bold text-primary">€{product.price.toFixed(2)}</p>
+            )}
           </CardContent>
           <CardFooter className="p-4 pt-0 gap-2">
             <Tooltip>

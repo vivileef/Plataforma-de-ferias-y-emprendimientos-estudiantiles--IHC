@@ -14,6 +14,8 @@ interface Product {
   category: string
   image: string
   description: string
+  descuento?: number
+  precioDescuento?: number
 }
 
 interface ProductListProps {
@@ -93,8 +95,16 @@ export function ProductList({ products, onDelete, onEdit, onViewDetails }: Produ
                 </Button>
               </div>
             </div>
-            <div className="flex items-center gap-4 mt-2 text-sm">
-              <span className="font-semibold text-primary">€{product.price.toFixed(2)}</span>
+            <div className="flex items-center gap-4 mt-2 text-sm flex-wrap">
+              {product.descuento && product.descuento > 0 ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground line-through">€{product.price.toFixed(2)}</span>
+                  <span className="font-semibold text-green-600 text-lg">€{product.precioDescuento?.toFixed(2)}</span>
+                  <Badge className="bg-green-500">-{product.descuento}%</Badge>
+                </div>
+              ) : (
+                <span className="font-semibold text-primary">€{product.price.toFixed(2)}</span>
+              )}
               <span className="text-muted-foreground">
                 Stock: <span className="font-medium text-foreground">{product.stock}</span>
               </span>

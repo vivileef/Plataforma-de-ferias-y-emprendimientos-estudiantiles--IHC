@@ -25,6 +25,8 @@ interface Product {
   category: string
   description: string
   image: string
+  descuento?: number
+  precioDescuento?: number
 }
 
 interface EditProductDialogProps {
@@ -41,6 +43,8 @@ export function EditProductDialog({ open, onOpenChange, onEdit, product }: EditP
     stock: "",
     category: "",
     description: "",
+    descuento: "",
+    tieneDescuento: false,
   })
 
   // Populate form when product changes
@@ -52,22 +56,35 @@ export function EditProductDialog({ open, onOpenChange, onEdit, product }: EditP
         stock: product.stock.toString(),
         category: product.category,
         description: product.description || "",
+        descuento: product.descuento?.toString() || "",
+        tieneDescuento: (product.descuento && product.descuento > 0) || false,
       })
     }
   }, [product])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!product) return
+    const precio = Number.parseFloat(formData.price)
+    const descuento = formData.tieneDescuento ? Number.parseFloat(formData.descuento) : 0
+    const precioDescuento = descuento > 0 ? precio * (1 - descuento / 100) : precio
 
     onEdit(product.id, {
       name: formData.name,
-      price: Number.parseFloat(formData.price),
+      price: precio,
       stock: Number.parseInt(formData.stock),
       category: formData.category,
       description: formData.description,
+      descuento: descuento,
+      precioDescuento: precioDescuento,
     })
     onOpenChange(false)
+  }
+
+  const calcularPrecioConDescuento = () => {
+    if (!formData.tieneDescuento || !formData.descuento) return null
+    const precio = Number.parseFloat(formData.price) || 0
+    const descuento = Number.parseFloat(formData.descuento) || 0
+    return precio * (1 - descuento / 100)
   }
 
   return (
@@ -137,6 +154,63 @@ export function EditProductDialog({ open, onOpenChange, onEdit, product }: EditP
                   <SelectItem value="Decoración">Decoración</SelectItem>
                   <SelectItem value="Joyería">Joyería</SelectItem>
                 </SelectContent>
+
+            {/* Sección de Descuento */}
+            <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="edit-tiene-descuento"
+                  checked={formData.tieneDescuento}
+                  onChange={(e) => setFormData({ ...formData, tieneDescuento: e.target.checked })}
+                  className="h-4 w-4 rounded"
+                />
+                <Label htmlFor="edit-tiene-descuento" className="cursor-pointer font-semibold">
+                  Aplicar Descuento/Promoción
+                </Label>
+              </div>
+
+              {formData.tieneDescuento && (
+                <div className="space-y-3 pt-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-descuento">Porcentaje de Descuento (%)</Label>
+                    <Input
+                      id="edit-descuento"
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="1"
+                      placeholder="10"
+                      value={formData.descuento}
+                      onChange={(e) => setFormData({ ...formData, descuento: e.target.value })}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Ingresa un porcentaje entre 0% y 100%
+                    </p>
+                  </div>
+
+                  {formData.price && formData.descuento && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm font-medium text-green-900">Vista Previa del Precio:</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-lg line-through text-gray-500">
+                          €{Number.parseFloat(formData.price).toFixed(2)}
+                        </span>
+                        <span className="text-2xl font-bold text-green-600">
+                          €{calcularPrecioConDescuento()?.toFixed(2)}
+                        </span>
+                        <span className="text-sm font-semibold text-green-700 bg-green-100 px-2 py-1 rounded">
+                          -{formData.descuento}%
+                        </span>
+                      </div>
+                      <p className="text-xs text-green-700 mt-1">
+                        Ahorras: €{(Number.parseFloat(formData.price) - (calcularPrecioConDescuento() || 0)).toFixed(2)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
               </Select>
             </div>
 

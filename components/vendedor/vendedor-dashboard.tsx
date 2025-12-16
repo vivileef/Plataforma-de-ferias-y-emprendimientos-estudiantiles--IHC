@@ -10,6 +10,7 @@ import { EditProductDialog } from "./edit-product-dialog"
 import { ProductDetailDialog } from "./product-detail-dialog"
 import { ReclamosVendedor } from "./reclamos-vendedor"
 import { ResenasVendedor } from "./resenas-vendedor"
+import { PromocionesVendedor } from "./promociones-vendedor"
 import { AppHeader } from "@/components/shared/app-header"
 import { getSession } from "@/components/auth/users"
 import { useProducts } from "@/components/products-context"
@@ -32,6 +33,7 @@ export function VendedorDashboard() {
   const [activeTab, setActiveTab] = useState("productos")
   const [reclamosPendientes, setReclamosPendientes] = useState(0)
   const [totalResenas, setTotalResenas] = useState(0)
+  const [promocionesActivas, setPromocionesActivas] = useState(0)
   const { toast } = useToast()
 
   // Cargar número de reclamos pendientes y reseñas
@@ -54,6 +56,16 @@ export function VendedorDashboard() {
           const product = products.find((p: any) => p.id === resena.productoId)
           return product !== undefined
         })
+
+        // Promociones activas
+        const allPromociones = JSON.parse(localStorage.getItem("marketplace_promociones") || "[]")
+        const misPromocionesActivas = allPromociones.filter((promo: any) => {
+          if (promo.vendedorEmail !== session.email) return false
+          const fechaFin = new Date(promo.fechaFin)
+          const ahora = new Date()
+          return fechaFin >= ahora && (!promo.limiteUsos || promo.usosActuales < promo.limiteUsos)
+        })
+        setPromocionesActivas(misPromocionesActivas.length)
         setTotalResenas(misResenas.length)
       } catch (error) {
         console.error("Error al cargar estadísticas:", error)
@@ -201,10 +213,10 @@ export function VendedorDashboard() {
             </div>
             <Tooltip>
               <TooltipTrigger asChild>
-            <Button onClick={() => setShowAddProduct(true)} className="gap-2">
-              <Plus className="h-4 w-4" />
-              {useLanguage().t("addProductButton")}
-            </Button>
+                <Button onClick={() => setShowAddProduct(true)} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  {useLanguage().t("addProductButton")}
+                </Button>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Publicar nuevo producto (Atajo: N)</p>
@@ -214,7 +226,7 @@ export function VendedorDashboard() {
 
           {/* Tabs de navegación */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+            <TabsList className="grid w-full grid-cols-4 max-w-3xl">
               <TabsTrigger value="productos">
                 Mis Productos
               </TabsTrigger>
@@ -231,6 +243,14 @@ export function VendedorDashboard() {
                 {totalResenas > 0 && (
                   <span className="ml-2 px-2 py-0.5 rounded-full bg-blue-500 text-white text-xs font-semibold">
                     {totalResenas}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="promociones" className="relative">
+                Promociones
+                {promocionesActivas > 0 && (
+                  <span className="ml-2 px-2 py-0.5 rounded-full bg-green-500 text-white text-xs font-semibold">
+                    {promocionesActivas}
                   </span>
                 )}
               </TabsTrigger>
@@ -282,6 +302,10 @@ export function VendedorDashboard() {
 
             <TabsContent value="resenas" className="mt-6">
               <ResenasVendedor />
+            </TabsContent>
+
+            <TabsContent value="promociones" className="mt-6">
+              <PromocionesVendedor />
             </TabsContent>
           </Tabs>
         </div>
