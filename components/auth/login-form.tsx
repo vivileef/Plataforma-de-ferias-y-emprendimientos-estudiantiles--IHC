@@ -46,7 +46,7 @@ export function LoginForm({ userType, title, description }: LoginFormProps) {
 
     const res = validateCredentials(email, password, userType)
     if (!res.ok) {
-      setError("Credenciales inválidas. Revisa tu correo y contraseña.")
+      setError(res.error || "Credenciales inválidas. Revisa tu correo y contraseña.")
       setIsLoading(false)
       return
     }

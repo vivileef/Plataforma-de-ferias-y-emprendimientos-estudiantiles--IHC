@@ -4,6 +4,8 @@ export type AppUser = {
   phone?: string
   password: string
   role: "vendedor" | "comprador" | "admin"
+  bloqueado?: boolean
+  motivoBloqueo?: string
 }
 
 const USERS_KEY = "marketplace_users_v1"
@@ -49,16 +51,22 @@ export function addUser(user: AppUser): { ok: boolean; error?: string } {
   return { ok: true }
 }
 
-export function validateCredentials(email: string, password: string, userType: AppUser['role']): { ok: boolean; user?: AppUser } {
+export function validateCredentials(email: string, password: string, userType: AppUser['role']): { ok: boolean; user?: AppUser; error?: string } {
   const users = readUsers()
   const found = users.find((u) => u.email.toLowerCase() === email.toLowerCase())
-  if (!found) return { ok: false }
-  if (found.password !== password) return { ok: false }
+  if (!found) return { ok: false, error: "Credenciales inválidas" }
+  if (found.password !== password) return { ok: false, error: "Credenciales inválidas" }
+  
+  // Verificar si está bloqueado
+  if (found.bloqueado && found.role === "vendedor") {
+    return { ok: false, error: `Cuenta suspendida: ${found.motivoBloqueo || "Contacta al administrador"}` }
+  }
+  
   // role must match for admin; for others ensure roles match
   if (userType === "admin") {
-    return found.role === "admin" ? { ok: true, user: found } : { ok: false }
+    return found.role === "admin" ? { ok: true, user: found } : { ok: false, error: "Acceso denegado" }
   }
-  return found.role === userType ? { ok: true, user: found } : { ok: false }
+  return found.role === userType ? { ok: true, user: found } : { ok: false, error: "Tipo de usuario incorrecto" }
 }
 
 type ResetToken = { token: string; email: string; expires: number }
