@@ -7,9 +7,10 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
-import { useProducts } from "@/components/products-context"
+import { useProducts, type Product as GlobalProduct } from "@/components/products-context"
 import { useToast } from "@/hooks/use-toast"
 import { getAllUsers } from "@/components/auth/users"
+import { useNotifications } from "@/components/notifications-context"
 import { 
   Calendar,
   Tag,
@@ -50,15 +51,13 @@ interface FeriaVendedor {
   productosIds: string[]
 }
 
-type Product = {
-  id: string
-  nombre: string
-  precio: number
-  categoria: string
+type Product = GlobalProduct & {
+  nombre?: string
+  precio?: number
   imagen?: string
-  descripcion: string
-  stock: number
-  vendedor: string
+  vendedor?: string
+  categoria?: string
+  descripcion?: string
   descuento?: number
   precioDescuento?: number
 }
@@ -66,6 +65,7 @@ type Product = {
 export function FeriasComprador() {
   const { products } = useProducts()
   const { toast } = useToast()
+  const { addNotification } = useNotifications()
   const [ferias, setFerias] = useState<Feria[]>([])
   const [selectedFeria, setSelectedFeria] = useState<Feria | null>(null)
   const [showFeriaDialog, setShowFeriaDialog] = useState(false)
@@ -165,11 +165,15 @@ export function FeriasComprador() {
     const cartData = localStorage.getItem(cartKey)
     const cart = cartData ? JSON.parse(cartData) : []
 
+    const productName = product.nombre || product.name
+
     // Verificar si el producto ya está en el carrito
     const existingIndex = cart.findIndex((item: any) => item.id === product.id)
     
+    let cantidad = 1
     if (existingIndex >= 0) {
       cart[existingIndex].cantidad += 1
+      cantidad = cart[existingIndex].cantidad
     } else {
       cart.push({
         ...product,
@@ -181,8 +185,24 @@ export function FeriasComprador() {
     
     toast({
       title: "¡Añadido al carrito!",
-      description: `${product.nombre} ha sido añadido a tu carrito`
+      description: `${productName} ha sido añadido a tu carrito`
     })
+
+    // Enviar notificación al vendedor
+    if (product.vendedorEmail) {
+      const users = getAllUsers()
+      const compradorUser = users.find((u: any) => u.email === session.email)
+      
+      addNotification({
+        vendedorEmail: product.vendedorEmail,
+        compradorEmail: session.email,
+        compradorNombre: compradorUser?.name || session.email,
+        tipo: "carrito",
+        productoId: product.id,
+        productoNombre: productName || "Producto",
+        cantidad: cantidad,
+      })
+    }
   }
 
   const formatearFecha = (fecha: string) => {
@@ -192,15 +212,19 @@ export function FeriasComprador() {
 
   // Filtrar productos de la feria actual
   const filteredFeriaProducts = feriaProducts.filter(product => {
-    const matchesSearch = product.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.descripcion.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === "todas" || product.categoria === selectedCategory
+    const productName = product.nombre || product.name || ""
+    const productDesc = product.description || ""
+    const productCat = product.categoria || product.category || ""
+    
+    const matchesSearch = productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         productDesc.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === "todas" || productCat === selectedCategory
     return matchesSearch && matchesCategory
   })
 
   // Obtener categorías únicas de los productos de la feria
   const categoriasDisponibles = selectedFeria 
-    ? Array.from(new Set(feriaProducts.map(p => p.categoria)))
+    ? Array.from(new Set(feriaProducts.map(p => p.categoria || p.category || "")))
     : []
 
   // Calcular estadísticas de la feria
@@ -229,7 +253,7 @@ export function FeriasComprador() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+        <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-linear-to-br from-purple-500 to-pink-500">
           <Sparkles className="h-6 w-6 text-white" />
         </div>
         <div>
@@ -305,7 +329,7 @@ export function FeriasComprador() {
                 </div>
 
                 {(feria.descuentoMinimo || feria.descuentoMaximo) && (
-                  <div className="flex items-center gap-2 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-2 p-3 bg-linear-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                     <TrendingUp className="h-5 w-5 text-green-600" />
                     <div>
                       <p className="text-sm font-medium text-green-900">
@@ -412,15 +436,15 @@ export function FeriasComprador() {
                   {filteredFeriaProducts.map((product) => (
                     <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow">
                       <div className="relative aspect-square">
-                        {product.imagen ? (
+                        {(product.imagen || product.image) ? (
                           <Image
-                            src={product.imagen}
-                            alt={product.nombre}
+                            src={product.imagen || product.image || "/placeholder.svg"}
+                            alt={product.nombre || product.name || "Producto"}
                             fill
                             className="object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                          <div className="w-full h-full bg-linear-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                             <Package className="h-12 w-12 text-gray-400" />
                           </div>
                         )}
@@ -432,9 +456,9 @@ export function FeriasComprador() {
                       </div>
                       <CardContent className="p-4 space-y-3">
                         <div>
-                          <h3 className="font-semibold line-clamp-1">{product.nombre}</h3>
+                          <h3 className="font-semibold line-clamp-1">{product.nombre || product.name}</h3>
                           <p className="text-sm text-muted-foreground line-clamp-2">
-                            {product.descripcion}
+                            {product.description}
                           </p>
                         </div>
                         
@@ -443,14 +467,14 @@ export function FeriasComprador() {
                             {product.descuento && product.precioDescuento ? (
                               <div className="space-y-1">
                                 <p className="text-xs text-muted-foreground line-through">
-                                  €{product.precio.toFixed(2)}
+                                  €{(product.precio || product.price || 0).toFixed(2)}
                                 </p>
                                 <p className="text-lg font-bold text-green-600">
                                   €{product.precioDescuento.toFixed(2)}
                                 </p>
                               </div>
                             ) : (
-                              <p className="text-lg font-bold">€{product.precio.toFixed(2)}</p>
+                              <p className="text-lg font-bold">€{(product.precio || product.price || 0).toFixed(2)}</p>
                             )}
                           </div>
                           <Badge variant="outline" className="text-xs">
@@ -507,12 +531,10 @@ export function FeriasComprador() {
       {/* Diálogo de detalle del producto */}
       {selectedProduct && (
         <ProductDetailDialog
-          product={selectedProduct}
+          product={selectedProduct as any}
           open={showProductDialog}
-          onClose={() => {
-            setShowProductDialog(false)
-            setSelectedProduct(null)
-          }}
+          onOpenChange={setShowProductDialog}
+          onAddToCart={handleAddToCart as any}
         />
       )}
     </div>

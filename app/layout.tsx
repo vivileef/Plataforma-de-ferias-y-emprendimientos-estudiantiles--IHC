@@ -6,6 +6,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import LanguageProvider from "@/components/language-provider"
 import ProductsProvider from "@/components/products-context"
+import { NotificationsProvider } from "@/components/notifications-context"
 import Footer from "@/components/shared/footer"
 import { Toaster } from "@/components/ui/toaster"
 
@@ -29,9 +30,11 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <LanguageProvider>
             <ProductsProvider>
-              {children}
-              <Footer />
-              <Toaster />
+              <NotificationsProvider>
+                {children}
+                <Footer />
+                <Toaster />
+              </NotificationsProvider>
             </ProductsProvider>
           </LanguageProvider>
         </ThemeProvider>

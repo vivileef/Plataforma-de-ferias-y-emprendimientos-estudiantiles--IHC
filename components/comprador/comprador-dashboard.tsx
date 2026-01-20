@@ -20,6 +20,7 @@ import { CategorySidebar } from "@/components/shared/category-sidebar"
 import { useProducts } from "@/components/products-context"
 import { useLanguage } from "@/components/language-provider"
 import { useToast } from "@/hooks/use-toast"
+import { useNotifications } from "@/components/notifications-context"
 
 // Products come from shared ProductsProvider (persisted in localStorage)
 
@@ -43,9 +44,12 @@ export function CompradorDashboard() {
   const { t } = useLanguage()
   const searchRef = useRef<HTMLInputElement | null>(null)
   const { toast } = useToast()
+  const { addNotification } = useNotifications()
 
   const handleAddToCart = (product: any) => {
+    const session = getSession()
     const existingItem = cart.find((item) => item.id === product.id)
+    
     if (existingItem) {
       setCart(cart.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)))
       toast({
@@ -60,6 +64,26 @@ export function CompradorDashboard() {
         description: `${product.name} - €${product.price.toFixed(2)}`,
         duration: 3000,
       })
+    }
+
+    // Enviar notificación al vendedor
+    if (session?.email && product.vendedorEmail) {
+      const users = getAllUsers()
+      const compradorUser = users.find((u: any) => u.email === session.email)
+      const cantidad = existingItem ? existingItem.quantity + 1 : 1
+      
+      addNotification({
+        vendedorEmail: product.vendedorEmail,
+        compradorEmail: session.email,
+        compradorNombre: compradorUser?.name || session.email,
+        tipo: "carrito",
+        productoId: product.id,
+        productoNombre: product.name,
+        cantidad: cantidad,
+      })
+    } else if (session?.email) {
+      // Fallback: intentar obtener email del vendedor por su nombre
+      console.log('Producto sin vendedorEmail:', product.name)
     }
   }
 
@@ -288,7 +312,7 @@ export function CompradorDashboard() {
                 <div className="flex items-center gap-2">
                   <Label htmlFor="section-select" className="text-sm font-medium">Sección:</Label>
                   <Select value={activeSection} onValueChange={setActiveSection}>
-                    <SelectTrigger id="section-select" className="w-[240px]">
+                    <SelectTrigger id="section-select" className="w-60">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

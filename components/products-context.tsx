@@ -11,6 +11,9 @@ export interface Product {
   category: string
   image: string
   description: string
+  vendedorEmail?: string
+  descuento?: number
+  precioDescuento?: number
 }
 
 type ProductsContextType = {

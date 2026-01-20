@@ -10,6 +10,7 @@ import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { usePathname } from "next/navigation"
 import { Input } from "@/components/ui/input"
+import { NotificacionesHeader } from "@/components/shared/notificaciones-header"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +76,9 @@ export function AppHeader({ userName, userRole, showLogout = true }: AppHeaderPr
               Hola, <span className="font-medium">{sessionName}</span>
             </div>
           )}
+
+          {/* Icono de notificaciones solo para vendedor */}
+          {sessionRole === "vendedor" && <NotificacionesHeader />}
 
           {/* Menú hamburguesa con todas las opciones */}
           <DropdownMenu>

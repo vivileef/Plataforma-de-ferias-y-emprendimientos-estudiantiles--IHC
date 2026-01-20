@@ -679,7 +679,7 @@ export function EliminacionVendedor() {
             {/* Advertencias */}
             <div className="space-y-3">
               <div className="flex items-start gap-3 p-4 bg-red-50 rounded-lg border border-red-200">
-                <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
                 <div className="text-sm">
                   <p className="font-medium text-red-900 mb-2">Consecuencias de la eliminación:</p>
                   <ul className="list-disc list-inside space-y-1 text-red-700">
@@ -694,7 +694,7 @@ export function EliminacionVendedor() {
               </div>
 
               <div className="flex items-start gap-3 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <FileText className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <FileText className="h-5 w-5 text-yellow-600 mt-0.5 shrink-0" />
                 <div className="text-sm">
                   <p className="font-medium text-yellow-900 mb-1">Documentación legal:</p>
                   <p className="text-yellow-700">

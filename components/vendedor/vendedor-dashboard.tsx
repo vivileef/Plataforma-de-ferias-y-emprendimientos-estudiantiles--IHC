@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, AlertCircle } from "lucide-react"
+import { Plus, AlertCircle, Bell } from "lucide-react"
 import { ProductList } from "./product-list"
 import { AddProductDialog } from "./add-product-dialog"
 import { EditProductDialog } from "./edit-product-dialog"
@@ -12,11 +13,14 @@ import { ReclamosVendedor } from "./reclamos-vendedor"
 import { ResenasVendedor } from "./resenas-vendedor"
 import { PromocionesVendedor } from "./promociones-vendedor"
 import { FeriasVendedor } from "./ferias-vendedor"
+import { NotificacionesVendedor } from "./notificaciones-vendedor"
+import { ProductMigration } from "@/components/product-migration"
 import { AppHeader } from "@/components/shared/app-header"
 import { getSession } from "@/components/auth/users"
 import { useProducts } from "@/components/products-context"
 import { useLanguage } from "@/components/language-provider"
 import { useToast } from "@/hooks/use-toast"
+import { useNotifications } from "@/components/notifications-context"
 import { CategorySidebar } from "@/components/shared/category-sidebar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -24,6 +28,7 @@ import { Label } from "@/components/ui/label"
 import { Menu, ChevronLeft, ChevronRight, Filter, Package, Star, Gift, Calendar } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 
 export function VendedorDashboard() {
   const [showAddProduct, setShowAddProduct] = useState(false)
@@ -38,6 +43,7 @@ export function VendedorDashboard() {
   const [totalResenas, setTotalResenas] = useState(0)
   const [promocionesActivas, setPromocionesActivas] = useState(0)
   const [feriasInscritas, setFeriasInscritas] = useState(0)
+  const [notificacionesNoLeidas, setNotificacionesNoLeidas] = useState(0)
   const [showSidebar, setShowSidebar] = useState(true)
   const [sidebarFilters, setSidebarFilters] = useState<any>({
     searchTerm: "",
@@ -46,6 +52,7 @@ export function VendedorDashboard() {
     hasDiscount: false
   })
   const { toast } = useToast()
+  const { getUnreadCount } = useNotifications()
 
   const handleFilterChange = (filters: any) => {
     setSidebarFilters(filters)
@@ -89,16 +96,19 @@ export function VendedorDashboard() {
           fv.vendedorEmail === session.email
         )
         setFeriasInscritas(misFeriasInscritas.length)
+
+        // Notificaciones no leídas
+        setNotificacionesNoLeidas(getUnreadCount(session.email))
       } catch (error) {
         console.error("Error al cargar estadísticas:", error)
       }
     }
 
     loadStats()
-    // Actualizar cada 30 segundos
-    const interval = setInterval(loadStats, 30000)
+    // Actualizar cada 5 segundos para notificaciones en tiempo real
+    const interval = setInterval(loadStats, 5000)
     return () => clearInterval(interval)
-  }, [activeTab, products])
+  }, [activeTab, products, getUnreadCount])
 
   // Filtrar productos por categoría y filtros del sidebar
   const filteredProducts = products.filter(product => {
@@ -126,7 +136,8 @@ export function VendedorDashboard() {
   })
 
   const handleAddProduct = (product: any) => {
-    addProduct({ ...product, seller: "(Vendedor)" })
+    const session = getSession()
+    addProduct({ ...product, seller: "(Vendedor)", vendedorEmail: session?.email })
     setShowAddProduct(false)
     toast({
       title: "¡Producto publicado!",
@@ -211,6 +222,7 @@ export function VendedorDashboard() {
   return (
     <TooltipProvider>
     <div className="min-h-screen flex flex-col">
+      <ProductMigration />
       <AppHeader userName={displayName} userRole="Vendedor" />
 
       <div className="flex flex-1">
@@ -290,6 +302,17 @@ export function VendedorDashboard() {
                     <div className="flex items-center gap-2">
                       <Package className="h-4 w-4" />
                       <span>Mis Productos</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="notificaciones">
+                    <div className="flex items-center gap-2">
+                      <Bell className="h-4 w-4" />
+                      <span>Notificaciones</span>
+                      {notificacionesNoLeidas > 0 && (
+                        <span className="ml-auto px-2 py-0.5 rounded-full bg-orange-500 text-white text-xs font-semibold">
+                          {notificacionesNoLeidas}
+                        </span>
+                      )}
                     </div>
                   </SelectItem>
                   <SelectItem value="reclamos">
@@ -400,6 +423,38 @@ export function VendedorDashboard() {
                     onEdit={handleEditProduct}
                     onViewDetails={handleViewDetails} 
                   />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="notificaciones" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bell className="h-5 w-5" />
+                    Centro de Notificaciones
+                  </CardTitle>
+                  <CardDescription>
+                    Accede al panel completo de notificaciones desde el icono de campanilla en la barra superior
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                    <p className="text-sm text-blue-900">
+                      <strong>📢 Información:</strong> Tu icono de notificaciones está en la esquina superior derecha. Haz clic para ver un popover con tus notificaciones más recientes.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+                    <p className="text-sm text-green-900">
+                      <strong>✅ Características:</strong> Recibirás notificaciones cuando un comprador añada tus productos al carrito o realice una compra. Haz clic en cualquier notificación para ver los detalles completos.
+                    </p>
+                  </div>
+                  <Link href="/vendedor/notificaciones">
+                    <Button className="w-full">
+                      <Bell className="h-4 w-4 mr-2" />
+                      Ir al Panel Completo de Notificaciones
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             </TabsContent>

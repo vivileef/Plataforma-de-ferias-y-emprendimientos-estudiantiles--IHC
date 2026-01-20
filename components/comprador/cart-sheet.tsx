@@ -11,6 +11,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { useNotifications } from "@/components/notifications-context"
+import { getSession, getAllUsers } from "@/components/auth/users"
 
 interface CartItem {
   id: string
@@ -18,6 +20,7 @@ interface CartItem {
   price: number
   quantity: number
   image: string
+  vendedorEmail?: string
 }
 
 interface CartSheetProps {
@@ -36,6 +39,7 @@ export function CartSheet({ open, onOpenChange, cart, onRemove, onUpdateQuantity
   const [codigoCupon, setCodigoCupon] = useState("")
   const [cuponAplicado, setCuponAplicado] = useState<any>(null)
   const { toast } = useToast()
+  const { addNotification } = useNotifications()
 
   const aplicarCupon = () => {
     if (!codigoCupon.trim()) {
@@ -105,6 +109,29 @@ export function CartSheet({ open, onOpenChange, cart, onRemove, onUpdateQuantity
       localStorage.setItem("marketplace_promociones", JSON.stringify(updated))
     }
 
+    // Enviar notificaciones de compra a los vendedores
+    const session = getSession()
+    if (session?.email) {
+      const users = getAllUsers()
+      const compradorUser = users.find((u: any) => u.email === session.email)
+      
+      cart.forEach((item) => {
+        if (item.vendedorEmail) {
+          addNotification({
+            vendedorEmail: item.vendedorEmail,
+            compradorEmail: session.email,
+            compradorNombre: compradorUser?.name || session.email,
+            tipo: "compra",
+            productoId: item.id,
+            productoNombre: item.name,
+            cantidad: item.quantity,
+          })
+        } else {
+          console.log('Item sin vendedorEmail en carrito:', item.name)
+        }
+      })
+    }
+
     setShowSuccess(true)
     toast({
       title: "¡Compra realizada con éxito!",
@@ -154,7 +181,7 @@ export function CartSheet({ open, onOpenChange, cart, onRemove, onUpdateQuantity
             <div className="space-y-4">
               {cart.map((item) => (
                 <div key={item.id} className="flex gap-4 p-4 border rounded-lg">
-                  <div className="relative h-20 w-20 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                  <div className="relative h-20 w-20 rounded-md overflow-hidden bg-muted shrink-0">
                     <Image src={item.image || "/placeholder.svg"} alt={item.name} fill sizes="80px" className="object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
